@@ -148,18 +148,18 @@ function AIContentRenderer({ content, onSectionLinkClick, onLegalLinkClick, open
                 <div className="text-white">
                     {Object.entries(content).map(([key, option]) => {
                          if (key.startsWith('option') && typeof option === 'object' && option !== null) {
-                            return (
+                             return (
                                  <ExpandableOption
-                                    key={key}
-                                    title={option.title}
-                                    isOpen={!!openOptions[key]}
-                                    onToggle={() => onOptionToggle(key)}
-                                >
-                                    <AIContentRenderer content={option} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
-                                </ExpandableOption>
-                            );
-                        }
-                        return null;
+                                     key={key}
+                                     title={option.title}
+                                     isOpen={!!openOptions[key]}
+                                     onToggle={() => onOptionToggle(key)}
+                                 >
+                                     <AIContentRenderer content={option} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                                 </ExpandableOption>
+                             );
+                         }
+                         return null;
                     })}
                 </div>
             );
@@ -296,8 +296,8 @@ const ReportViewerModal = React.memo(function ReportViewerModal({ report, scenar
              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4">
                  <div className="bg-gray-900 p-6 rounded-2xl shadow-2xl max-w-lg w-full text-white">
                      <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold text-red-400">Report Error</h2>
-                         <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={24} /></button>
+                         <h2 className="text-2xl font-bold text-red-400">Report Error</h2>
+                          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={24} /></button>
                      </div>
                      <p className="mt-4">Could not load the report data for "{report.title}". The associated scenario key "{report.scenarioKey}" could not be found.</p>
                  </div>
@@ -337,7 +337,7 @@ const ReportViewerModal = React.memo(function ReportViewerModal({ report, scenar
                         </div>
                         {Object.keys(reportData).filter(k => k.startsWith('step')).map(stepKey => (
                             <StepDetail key={stepKey} stepKey={stepKey} title={reportData[stepKey].title}>
-                                 <AIContentRenderer
+                                <AIContentRenderer
                                     content={reportData[stepKey].content}
                                     onSectionLinkClick={onSectionLinkClick}
                                     onLegalLinkClick={onLegalLinkClick}
@@ -1199,57 +1199,226 @@ const HOSQA = ({
     );
 };
 
+// --- START OF CODE CHANGES ---
+
+// CALENDAR COMPONENT: This has been modified to be a "controlled component".
+// It no longer has its own internal 'view' state. Instead, it receives the
+// current view and a function to change the view from its parent (the App component).
+// This is crucial for fixing the "return to the wrong view" bug.
+const CALENDAR = ({ events = [], view, onViewChange, setAttendingEvent }) => {
+    // State to manage the detail modal for monthly view
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    
+    // State to manage the month being displayed in the calendar view
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    const changeMonth = (amount) => {
+        setCurrentDate(prevDate => {
+            const newDate = new Date(prevDate);
+            newDate.setMonth(newDate.getMonth() + amount);
+            return newDate;
+        });
+    };
+
+    const renderMonthGrid = () => {
+        const month = currentDate.getMonth();
+        const year = currentDate.getFullYear();
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const days = [];
+
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            days.push(<div key={`empty-${i}`} className="border border-gray-700 bg-gray-800"></div>);
+        }
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayDate = new Date(year, month, i);
+            const today = new Date();
+            const isToday = dayDate.toDateString() === today.toDateString();
+            
+            const dayEvents = Array.isArray(events) ? events.filter(event => {
+                if (!event || !event.date) return false;
+                const eventDate = new Date(event.date + 'T12:00:00Z');
+                if (isNaN(eventDate.getTime())) return false;
+                return eventDate.toDateString() === dayDate.toDateString();
+            }) : [];
+
+            days.push(
+                <div key={i} className={`border border-gray-700 p-2 flex flex-col ${isToday ? 'bg-blue-900 bg-opacity-40' : ''}`}>
+                    <div className={`font-bold ${isToday ? 'text-white' : 'text-gray-300'}`}>{i}</div>
+                    <div className="mt-1 space-y-1 flex-grow overflow-y-auto">
+                        {dayEvents.map((event, idx) => (
+                            <button 
+                                key={idx} 
+                                // This now correctly opens the detail modal first
+                                onClick={() => setSelectedEvent(event)}
+                                className="block w-full text-left bg-emerald-800 hover:bg-emerald-700 text-white text-xs rounded px-2 py-1 whitespace-normal transition-colors"
+                            >
+                                {event.title}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return days;
+    };
+
+    return (
+        <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl font-bold text-center mb-4">Calendar of Events</h1>
+            <div className="flex justify-center mb-6">
+                <div className="flex items-center bg-gray-700 rounded-lg p-1">
+                    {/* These buttons now call the function passed from the parent App component */}
+                    <button onClick={() => onViewChange('list')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'list' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>List View</button>
+                    <button onClick={() => onViewChange('month')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'month' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>Month View</button>
+                </div>
+            </div>
+
+            <div className="bg-[#4B5C64] p-4 sm:p-6 rounded-2xl shadow-2xl">
+                {view === 'list' ? (
+                    <>
+                        <div className="hidden md:grid grid-cols-12 gap-6 px-4 pb-3 border-b-2 border-gray-500 font-bold text-sm text-white">
+                            <div className="col-span-2">DATE</div>
+                            <div className="col-span-2">EVENT TYPE</div>
+                            <div className="col-span-2">CATEGORY</div>
+                            <div className="col-span-4">NAME</div>
+                            <div className="col-span-2 text-center">LOCATION</div>
+                        </div>
+                        <div className="space-y-4 mt-4">
+                            {Array.isArray(events) && events.map((event, index) => (
+                                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-3 p-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors border-l-4 border-[#faecc4]">
+                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase">DATE</div>
+                                    <div className="col-span-12 md:col-span-2 font-semibold text-white flex items-center">{event.date ? new Date(event.date + 'T12:00:00Z').toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'No Date'}</div>
+                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">EVENT TYPE</div>
+                                    <div className="col-span-12 md:col-span-2 text-white flex items-center">{event.eventType}</div>
+                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">CATEGORY</div>
+                                    <div className="col-span-12 md:col-span-2 text-white flex items-center">{event.category}</div>
+                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">NAME</div>
+                                    <div className="col-span-12 md:col-span-4"><h3 className="font-bold text-[#faecc4]">{event.title}</h3><p className="mt-1 text-gray-200 text-sm">{event.description}</p></div>
+                                    <div className="col-span-12 md:col-span-2 flex md:flex-col items-start md:items-center justify-between md:justify-center gap-2">
+                                        <div><div className="md:hidden font-bold text-gray-400 text-xs uppercase">LOCATION</div><div className="text-white text-left md:text-center">{event.location}</div></div>
+                                        {/* This button correctly opens the Attendance modal */}
+                                        <button onClick={() => setAttendingEvent(event)} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Attend</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div>
+                        <div className="flex justify-between items-center mb-4 px-2">
+                            <button onClick={() => changeMonth(-1)} className="p-2 rounded-md hover:bg-gray-600 text-white"><ChevronLeft /></button>
+                            <h2 className="text-2xl font-bold text-white">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+                            <button onClick={() => changeMonth(1)} className="p-2 rounded-md hover:bg-gray-600 text-white"><ChevronRight /></button>
+                        </div>
+                        <div className="grid grid-cols-7 text-center font-bold text-gray-300">
+                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="py-2 border-b border-gray-700">{day}</div>)}
+                        </div>
+                        <div className="grid grid-cols-7 auto-rows-fr min-h-[500px]">
+                            {renderMonthGrid()}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* This is the new detail modal for the monthly view */}
+            {selectedEvent && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={() => setSelectedEvent(null)}>
+                    <div className="bg-gray-700 rounded-lg shadow-2xl w-full max-w-2xl p-6 relative border-l-4 border-[#faecc4]" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" aria-label="Close">
+                           <X size={24} />
+                        </button>
+                        <div className="space-y-4">
+                            <div>
+                                <div className="font-bold text-gray-400 text-xs uppercase">DATE</div>
+                                <div className="font-semibold text-white">{new Date(selectedEvent.date + 'T12:00:00Z').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <div className="font-bold text-gray-400 text-xs uppercase">EVENT TYPE</div>
+                                    <div className="text-white">{selectedEvent.eventType}</div>
+                                </div>
+                                <div>
+                                    <div className="font-bold text-gray-400 text-xs uppercase">CATEGORY</div>
+                                    <div className="text-white">{selectedEvent.category}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="font-bold text-gray-400 text-xs uppercase">NAME</div>
+                                <h3 className="font-bold text-2xl text-[#faecc4]">{selectedEvent.title}</h3>
+                            </div>
+                            <div>
+                                <div className="font-bold text-gray-400 text-xs uppercase">DESCRIPTION</div>
+                                <p className="mt-1 text-gray-200 text-sm">{selectedEvent.description}</p>
+                            </div>
+                            <div>
+                                <div className="font-bold text-gray-400 text-xs uppercase">LOCATION</div>
+                                <div className="text-white">{selectedEvent.location}</div>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex justify-end items-center gap-4">
+                            <button onClick={() => setSelectedEvent(null)} className="bg-gray-600 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Close</button>
+                            {/* This "Attend" button now works correctly */}
+                            <button onClick={() => { setAttendingEvent(selectedEvent); setSelectedEvent(null); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Attend</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function App() {
       const [page, setPage] = useState('dashboard');
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-      const [calendarView, setCalendarView] = useState('list');
-      const handleSetAttendingEvent = (event, view) => {
-      setAttendingEvent(event);
-      setCalendarView(view || 'list'); 
-};
-      const [events, setEvents] = useState([
+      // This state is now the single source of truth for the calendar view
+      const [calendarView, setCalendarView] = useState('list'); 
+
+      // REMOVED `handleSetAttendingEvent` function as it's no longer needed.
       
-    { 
-        date: '2025-09-09', 
-        title: 'Head of School - Town Hall',
-        eventType: 'School Meeting',
-        category: 'Governance',
-        location: 'Online',
-        description: 'An open forum for faculty and staff to discuss upcoming initiatives and address key issues with the Head of School.' 
-    },
-    { 
-        date: '2025-09-11', 
-        title: 'FMLA Guidance Webinar',
-        eventType: 'Webinar',
-        category: 'Human Resources, Legal',
-        location: 'Online',
-        description: 'This session provides an overview of the Family and Medical Leave Act (FMLA), focusing on compliance requirements for independent schools.'
-    },
-    { 
-        date: '2025-09-15', 
-        title: 'Board of Trustees Meeting',
-        eventType: 'School Meeting',
-        category: 'Governance, Finance',
-        location: 'Online',
-        description: 'Regularly scheduled meeting for the Board of Trustees to review financial reports, strategic goals, and committee updates.'
-    },
-    { 
-        date: '2025-09-25', 
-        title: 'ADA Legal Guidance Webinar',
-        eventType: 'Webinar',
-        category: 'Legal, Student Support',
-        location: 'Online',
-        description: 'Explore best practices for ensuring your school complies with the Americans with Disabilities Act (ADA) for both students and employees.'
-    },
-    { 
-        date: '2025-10-20', 
-        title: 'Weekend Workshop Conference',
-        eventType: 'Conference',
-        category: 'All',
-        location: 'Online',
-        description: 'The premier professional development and networking event for independent school leaders.' 
-    }
-]);
+      const [events, setEvents] = useState([
+        { 
+            date: '2025-09-09', 
+            title: 'Head of School - Town Hall',
+            eventType: 'School Meeting',
+            category: 'Governance',
+            location: 'Online',
+            description: 'An open forum for faculty and staff to discuss upcoming initiatives and address key issues with the Head of School.' 
+        },
+        { 
+            date: '2025-09-11', 
+            title: 'FMLA Guidance Webinar',
+            eventType: 'Webinar',
+            category: 'Human Resources, Legal',
+            location: 'Online',
+            description: 'This session provides an overview of the Family and Medical Leave Act (FMLA), focusing on compliance requirements for independent schools.'
+        },
+        { 
+            date: '2025-09-15', 
+            title: 'Board of Trustees Meeting',
+            eventType: 'School Meeting',
+            category: 'Governance, Finance',
+            location: 'Online',
+            description: 'Regularly scheduled meeting for the Board of Trustees to review financial reports, strategic goals, and committee updates.'
+        },
+        { 
+            date: '2025-09-25', 
+            title: 'ADA Legal Guidance Webinar',
+            eventType: 'Webinar',
+            category: 'Legal, Student Support',
+            location: 'Online',
+            description: 'Explore best practices for ensuring your school complies with the Americans with Disabilities Act (ADA) for both students and employees.'
+        },
+        { 
+            date: '2025-10-20', 
+            title: 'Weekend Workshop Conference',
+            eventType: 'Conference',
+            category: 'All',
+            location: 'Online',
+            description: 'The premier professional development and networking event for independent school leaders.' 
+        }
+    ]);
     const [showSuggestionModal, setShowSuggestionModal] = useState(false);
     const [suggestedUpdate, setSuggestedUpdate] = useState("");
     const suggestionSectionRef = useRef("");
@@ -1283,14 +1452,14 @@ export default function App() {
 
     const [pendingUpdates, setPendingUpdates] = useState([
     { 
-      id: 1, 
-      title: "New State Law on Student Social Media Interaction", 
-      date: "2025-09-04", 
-      type: "Immediate Action Required", 
-      affectedSection: "6. Code of Conduct", 
-      rationale: "This new state law requires a more explicit policy than what is currently stated...",
-      // ADD THIS NEW PROPERTY WITH THE FULL TEXT
-      sourceText: `
+        id: 1, 
+        title: "New State Law on Student Social Media Interaction", 
+        date: "2025-09-04", 
+        type: "Immediate Action Required", 
+        affectedSection: "6. Code of Conduct", 
+        rationale: "This new state law requires a more explicit policy than what is currently stated...",
+        // ADD THIS NEW PROPERTY WITH THE FULL TEXT
+        sourceText: `
 **House Bill 1412 - Student and Employee Digital Conduct**
 
 **Section 1: Definitions**
@@ -1396,7 +1565,7 @@ export default function App() {
    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
 
    Question: "${questionText}"`;
-       
+        
         const legalResponseSchema = {
             type: "OBJECT",
             properties: {
@@ -1404,9 +1573,9 @@ export default function App() {
                 "references": {
                type: "OBJECT",
                properties: {
-                   "citation": { "type": "STRING" },
-                   "relevance": { "type": "STRING" }
-                },
+                  "citation": { "type": "STRING" },
+                  "relevance": { "type": "STRING" }
+               },
                required: ["citation", "relevance"]
                 },
                 "risk": {
@@ -1462,175 +1631,7 @@ export default function App() {
         setSubmittedLegalQuestion(null);
         setLegalAnswer(null);
     };
-       
-const CALENDAR = ({ initialView, setAttendingEvent, events = [] }) => {
-    // State to manage the modal
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    
-    // State to manage the view ('list' or 'month'), correctly initialized
-    const [view, setView] = useState(initialView || 'list'); 
-    
-    // State to manage the month being displayed
-    const [currentDate, setCurrentDate] = useState(new Date());
-
-    // Placeholder Icons to prevent errors
-    const ChevronLeft = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>;
-    const ChevronRight = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>;
-
-    const changeMonth = (amount) => {
-        setCurrentDate(prevDate => {
-            const newDate = new Date(prevDate);
-            newDate.setMonth(newDate.getMonth() + amount);
-            return newDate;
-        });
-    };
-
-    const renderMonthGrid = () => {
-        const month = currentDate.getMonth();
-        const year = currentDate.getFullYear();
-        const firstDayOfMonth = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const days = [];
-
-        for (let i = 0; i < firstDayOfMonth; i++) {
-            days.push(<div key={`empty-${i}`} className="border border-gray-700 bg-gray-800"></div>);
-        }
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayDate = new Date(year, month, i);
-            const today = new Date();
-            const isToday = dayDate.toDateString() === today.toDateString();
-            
-            // Safety check for events array
-            const dayEvents = Array.isArray(events) ? events.filter(event => {
-                if (!event || !event.date) return false;
-                const eventDate = new Date(event.date + 'T12:00:00Z');
-                if (isNaN(eventDate.getTime())) return false;
-                return eventDate.toDateString() === dayDate.toDateString();
-            }) : [];
-
-            days.push(
-                <div key={i} className={`border border-gray-700 p-2 flex flex-col ${isToday ? 'bg-blue-900 bg-opacity-40' : ''}`}>
-                    <div className={`font-bold ${isToday ? 'text-white' : 'text-gray-300'}`}>{i}</div>
-                    <div className="mt-1 space-y-1 flex-grow overflow-y-auto">
-                        {dayEvents.map((event, idx) => (
-                            <button 
-                                key={idx} 
-                                onClick={() => setSelectedEvent(event)}
-                                className="block w-full text-left bg-emerald-800 hover:bg-emerald-700 text-white text-xs rounded px-2 py-1 whitespace-normal transition-colors"
-                            >
-                                {event.title}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-        return days;
-    };
-
-
-    return (
-        <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold text-center mb-4">Calendar of Events</h1>
-            <div className="flex justify-center mb-6">
-                <div className="flex items-center bg-gray-700 rounded-lg p-1">
-                    <button onClick={() => setView('list')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'list' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>List View</button>
-                    <button onClick={() => setView('month')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'month' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}`}>Month View</button>
-                </div>
-            </div>
-
-            <div className="bg-[#4B5C64] p-4 sm:p-6 rounded-2xl shadow-2xl">
-                {view === 'list' ? (
-                    <>
-                        <div className="hidden md:grid grid-cols-12 gap-6 px-4 pb-3 border-b-2 border-gray-500 font-bold text-sm text-white">
-                            <div className="col-span-2">DATE</div>
-                            <div className="col-span-2">EVENT TYPE</div>
-                            <div className="col-span-2">CATEGORY</div>
-                            <div className="col-span-4">NAME</div>
-                            <div className="col-span-2 text-center">LOCATION</div>
-                        </div>
-                        <div className="space-y-4 mt-4">
-                            {Array.isArray(events) && events.map((event, index) => (
-                                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-3 p-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors border-l-4 border-[#faecc4]">
-                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase">DATE</div>
-                                    <div className="col-span-12 md:col-span-2 font-semibold text-white flex items-center">{event.date ? new Date(event.date + 'T12:00:00Z').toLocaleDateString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'No Date'}</div>
-                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">EVENT TYPE</div>
-                                    <div className="col-span-12 md:col-span-2 text-white flex items-center">{event.eventType}</div>
-                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">CATEGORY</div>
-                                    <div className="col-span-12 md:col-span-2 text-white flex items-center">{event.category}</div>
-                                    <div className="md:hidden font-bold text-gray-400 text-xs uppercase mt-2 md:mt-0">NAME</div>
-                                    <div className="col-span-12 md:col-span-4"><h3 className="font-bold text-[#faecc4]">{event.title}</h3><p className="mt-1 text-gray-200 text-sm">{event.description}</p></div>
-                                    <div className="col-span-12 md:col-span-2 flex md:flex-col items-start md:items-center justify-between md:justify-center gap-2">
-                                        <div><div className="md:hidden font-bold text-gray-400 text-xs uppercase">LOCATION</div><div className="text-white text-left md:text-center">{event.location}</div></div>
-                                        <button onClick={() => setAttendingEvent(event, view)} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Attend</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                ) : (
-                    <div>
-                        <div className="flex justify-between items-center mb-4 px-2">
-                            <button onClick={() => changeMonth(-1)} className="p-2 rounded-md hover:bg-gray-600 text-white"><ChevronLeft /></button>
-                            <h2 className="text-2xl font-bold text-white">{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
-                            <button onClick={() => changeMonth(1)} className="p-2 rounded-md hover:bg-gray-600 text-white"><ChevronRight /></button>
-                        </div>
-                        <div className="grid grid-cols-7 text-center font-bold text-gray-300">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day} className="py-2 border-b border-gray-700">{day}</div>)}
-                        </div>
-                        <div className="grid grid-cols-7 auto-rows-fr min-h-[500px]">
-                            {renderMonthGrid()}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {selectedEvent && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4" onClick={() => setSelectedEvent(null)}>
-                    <div className="bg-gray-700 rounded-lg shadow-2xl w-full max-w-2xl p-6 relative border-l-4 border-[#faecc4]" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" aria-label="Close">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                        <div className="space-y-4">
-                            <div>
-                                <div className="font-bold text-gray-400 text-xs uppercase">DATE</div>
-                                <div className="font-semibold text-white">{new Date(selectedEvent.date + 'T12:00:00Z').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <div className="font-bold text-gray-400 text-xs uppercase">EVENT TYPE</div>
-                                    <div className="text-white">{selectedEvent.eventType}</div>
-                                </div>
-                                <div>
-                                    <div className="font-bold text-gray-400 text-xs uppercase">CATEGORY</div>
-                                    <div className="text-white">{selectedEvent.category}</div>
-                                </div>
-                            </div>
-                            <div>
-                                <div className="font-bold text-gray-400 text-xs uppercase">NAME</div>
-                                <h3 className="font-bold text-2xl text-[#faecc4]">{selectedEvent.title}</h3>
-                            </div>
-                            <div>
-                                <div className="font-bold text-gray-400 text-xs uppercase">DESCRIPTION</div>
-                                <p className="mt-1 text-gray-200 text-sm">{selectedEvent.description}</p>
-                            </div>
-                            <div>
-                                <div className="font-bold text-gray-400 text-xs uppercase">LOCATION</div>
-                                <div className="text-white">{selectedEvent.location}</div>
-                            </div>
-                        </div>
-                        <div className="mt-8 flex justify-end items-center gap-4">
-                            <button onClick={() => setSelectedEvent(null)} className="bg-gray-600 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Close</button>
-                            <button onClick={() => { setAttendingEvent(selectedEvent, view); setSelectedEvent(null); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-colors">Attend</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-    
+        
     // --- SIDEBAR DATA ---
     const SIDEBAR_LINKS = [
         { key: "dashboard", label: "IQ Dashboard", icon: <Shield className="w-5 h-5" /> },
@@ -1656,7 +1657,7 @@ const CALENDAR = ({ initialView, setAttendingEvent, events = [] }) => {
                 onDismiss={handleDismissUpdate}
                 onClose={() => setReviewingUpdate(null)}
             />;
-        }     
+        }      
 
         switch (page) {
             case 'dashboard':
@@ -1672,24 +1673,32 @@ const CALENDAR = ({ initialView, setAttendingEvent, events = [] }) => {
                 />;
 
            case 'handbook':
-              return <Handbook
-                   onViewAlertDetail={setViewedAlert}
-                   handbookContent={handbook}
-                   pendingUpdates={pendingUpdates}
-                   archivedUpdates={archivedUpdates}
-                   monitoredTrends={monitoredTrends}
-                   onViewUpdate={setReviewingUpdate}
-                   apiKey={GEMINI_API_KEY}
-                   HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
-                   // ADD THESE TWO PROPS TO PROVIDE DATA TO THE RESTORED SECTIONS
-                   handbookSections={handbookSections}
-                   onSectionLinkClick={handleSectionLinkClick}
+               return <Handbook
+                    onViewAlertDetail={setViewedAlert}
+                    handbookContent={handbook}
+                    pendingUpdates={pendingUpdates}
+                    archivedUpdates={archivedUpdates}
+                    monitoredTrends={monitoredTrends}
+                    onViewUpdate={setReviewingUpdate}
+                    apiKey={GEMINI_API_KEY}
+                    HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
+                    // ADD THESE TWO PROPS TO PROVIDE DATA TO THE RESTORED SECTIONS
+                    handbookSections={handbookSections}
+                    onSectionLinkClick={handleSectionLinkClick}
                 />;
 
             case 'calendar':
-                return <CALENDAR />;
+                // This is the updated call to the CALENDAR component.
+                // It now passes all the necessary state and functions down,
+                // making the CALENDAR a "controlled" component.
+                return <CALENDAR 
+                    events={events}
+                    view={calendarView}
+                    onViewChange={setCalendarView}
+                    setAttendingEvent={setAttendingEvent}
+                />;
 
-            case 'hosqa':      
+            case 'hosqa':    
                 return <HOSQA
                     industryQuestions={industryQuestions}
                     setIndustryQuestions={setIndustryQuestions}
@@ -1840,3 +1849,5 @@ const CALENDAR = ({ initialView, setAttendingEvent, events = [] }) => {
         </div>
     );
 }
+
+// --- END OF CODE CHANGES ---
