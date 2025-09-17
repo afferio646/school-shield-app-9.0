@@ -10,7 +10,7 @@ import Dashboard from './components/Dashboard.jsx';
 import Handbook from './components/Handbook.jsx';
 import AlertDetailModal from './components/AlertDetailModal.jsx';
 import AttendanceModal from './components/AttendanceModal.jsx';
-import { handbookData } from './components/HandbookData.js';
+import { HandbookData } from './components/HandbookData.js';
 
 // --- SECURE API KEY HANDLING ---
 const GEMINI_API_KEY = "AIzaSyCYAfKVJ9BTLWHpNLDr0bHDsvYOdWMfIpw";
