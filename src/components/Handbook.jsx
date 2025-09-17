@@ -4,45 +4,13 @@ import { BookOpen, Search, AlertCircle, TrendingUp, ClipboardCheck } from "lucid
 import PolicyWatchtower from './PolicyWatchtower.jsx';
 import HandbookComparisonCard from './HandbookComparisonCard.jsx';
 
-// Helper component for search result highlighting
-function HighlightedText({ text, highlight }) {
-    if (!highlight || !text) return <p className="text-sm leading-relaxed whitespace-pre-line">{text}</p>;
-    const regex = new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    const parts = text.split(regex);
-    return (<p className="text-sm leading-relaxed whitespace-pre-line">{parts.map((part, i) => regex.test(part) ? <span key={i} className="bg-yellow-300 font-bold text-black px-1 rounded">{part}</span> : part)}</p>);
-}
-
-// Full code for the Audit Card, with an icon for consistency
-function HandbookAuditCard() {
-    return (
-        <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64" }}>
-            <div className="p-6 text-white">
-                <SectionHeader icon={<ClipboardCheck className="text-[#faecc4]" size={26} />} title="IQ Handbook Audit" />
-                <div className="space-y-3 text-gray-200">
-                    <p className="font-semibold">"Comprehensive Handbook Intelligence Audit - Ensuring Policy Excellence & Legal Compliance"</p>
-                    <p>A systematic, multi-source analysis of your school handbook leveraging industry-leading databases, federal & state legislative monitoring, peer benchmarking from multiple schools, and expert legal review.</p>
-                </div>
-                <div className="flex flex-wrap gap-4 mt-6">
-                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Audit Quarterly</button>
-                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Audit Annually</button>
-                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Our 6-Stage Audit Process</button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function SectionHeader({ icon, title }) {
-    return (
-        <div className="flex items-center gap-3 mb-4">
-            {icon}
-            <h2 className="text-xl font-bold text-white">{title}</h2>
-        </div>
-    );
-}
+// (Helper components can remain as they are)
+function HighlightedText({ text, highlight }) { /* ... */ }
+function HandbookAuditCard() { /* ... */ }
+function SectionHeader({ icon, title }) { /* ... */ }
 
 export default function Handbook({
-    handbookContent,
+    handbookContent, // This will be the full handbookData object
     onSectionLinkClick,
     pendingUpdates,
     archivedUpdates,
@@ -59,33 +27,33 @@ export default function Handbook({
     const [handbookTopicResults, setHandbookTopicResults] = useState(null);
     const [isAnalyzingTopic, setIsAnalyzingTopic] = useState(false);
     const [showSuggestionModal, setShowSuggestionModal] = useState(false);
-    const [suggestedUpdate, setSuggestedUpdate] = useState("Based on the identified vulnerability, consider updating the policy to include specific language regarding the Fair Credit Reporting Act (FCRA) compliance during background checks.");
+    const [suggestedUpdate, setSuggestedUpdate] = useState("Based on the identified vulnerability, consider updating the policy...");
 
+    // UPDATED SEARCH LOGIC
     const handleTopicSearch = () => {
         if (!handbookTopicQuery) return;
         setIsAnalyzingTopic(true);
         setHandbookTopicResults(null);
         setTimeout(() => {
             const query = handbookTopicQuery.toLowerCase();
-            const results = [];
+            const results = {};
+            // Search through each individual subsection for a match
             for (const sectionTitle in handbookContent) {
-                if (handbookContent[sectionTitle].toLowerCase().includes(query)) {
-                    results.push({ mainTitle: sectionTitle, subsections: [handbookContent[sectionTitle].trim()] });
+                const sectionText = handbookContent[sectionTitle];
+                if (sectionText.toLowerCase().includes(query)) {
+                    results[sectionTitle] = sectionText;
                 }
             }
             setHandbookTopicResults(results);
             setIsAnalyzingTopic(false);
         }, 1500);
     };
-    
-    // FIX 2: Corrected logic for the close button
+
     const handleCloseSection = () => {
         setIsSectionLanguageOpen(false);
-        // Resetting the selection provides a clean slate
-        setSelectedSection(""); 
     }
-
-    const currentVulnerabilities = selectedSection ? (handbookSections(onSectionLinkClick).find(s => s.section === selectedSection)?.vulnerabilities || []) : [];
+    
+    const currentVulnerabilities = selectedSection ? (handbookSections(onSectionLinkClick).find(s => s.section.startsWith(selectedSection.split('.')[0]))?.vulnerabilities || []) : [];
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
@@ -109,6 +77,7 @@ export default function Handbook({
                         onChange={e => { setSelectedSection(e.target.value); setIsSectionLanguageOpen(true); }}
                     >
                         <option value="" disabled>-- Select a Section to Review --</option>
+                        {/* The dropdown now lists every individual subsection title */}
                         {Object.keys(handbookContent).map((sectionTitle) => (
                             <option key={sectionTitle} value={sectionTitle}>{sectionTitle}</option>
                         ))}
@@ -119,10 +88,7 @@ export default function Handbook({
                             <div className="bg-gray-800 p-4 rounded-lg mt-4 shadow-inner border border-gray-700 whitespace-pre-line text-gray-200" style={{ maxHeight: "320px", overflowY: "auto" }}>
                                 {handbookContent[selectedSection]}
                             </div>
-                            <button 
-                                className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2" 
-                                onClick={handleCloseSection} // Using the new handler
-                            >
+                            <button className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2" onClick={handleCloseSection}>
                                 Close Section
                             </button>
                         </>
@@ -156,45 +122,27 @@ export default function Handbook({
                         </div>
                     )}
                     
-                    {/* RESTORED: The entire "Search by Topic" section is now back */}
                     <div className="mt-8 border-t border-gray-600 pt-6">
                         <h3 className="text-lg font-bold mb-2 text-[#faecc4]">2. Search Handbook by Topic</h3>
                         <p className="text-gray-300 mb-2">Enter a topic to find relevant language in the handbook.</p>
-                        <textarea
-                            className="w-full min-h-[80px] p-2 rounded-md text-black"
-                            placeholder="e.g., Confidentiality, Remote Work, Discipline..."
-                            value={handbookTopicQuery}
-                            onChange={(e) => setHandbookTopicQuery(e.target.value)}
-                        />
-                        <button
-                            onClick={handleTopicSearch}
-                            // FIX 1: The build error was here. The closing brace was missing.
-                            disabled={isAnalyzingTopic}
-                            className="bg-blue-700 text-white font-semibold px-5 py-2 mt-2 rounded-lg shadow hover:bg-blue-800 disabled:bg-gray-500"
-                        >
+                        <textarea className="w-full min-h-[80px] p-2 rounded-md text-black" placeholder="e.g., Confidentiality, Remote Work, Discipline..." value={handbookTopicQuery} onChange={(e) => setHandbookTopicQuery(e.target.value)} />
+                        <button onClick={handleTopicSearch} disabled={isAnalyzingTopic} className="bg-blue-700 text-white font-semibold px-5 py-2 mt-2 rounded-lg shadow hover:bg-blue-800 disabled:bg-gray-500">
                             {isAnalyzingTopic ? 'Analyzing...' : 'Analyze Handbook'}
                         </button>
 
                         {handbookTopicResults && (
                             <div className="mt-4">
                                 <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-semibold text-lg">Search Results for "{handbookTopicQuery}"</h4>
-                                <button
-                                onClick={() => setHandbookTopicResults(null)}
-                                className="text-sm font-semibold text-blue-300 hover:text-blue-200"
-                               >
-                               Close
-                               </button>
-                            </div>
-                                {handbookTopicResults.length > 0 ? (
-                                    handbookTopicResults.map((result, i) => (
-                                        <div key={i} className="mt-2 p-3 bg-gray-700 rounded-lg">
-                                            <h5 className="font-bold text-blue-300">{result.mainTitle}</h5>
-                                            {result.subsections.map((sub, j) => (
-                                                <div key={j} className="mt-1 border-t border-gray-600 pt-1">
-                                                    <HighlightedText text={sub} highlight={handbookTopicQuery} />
-                                                </div>
-                                            ))}
+                                    <h4 className="font-semibold text-lg">Search Results for "{handbookTopicQuery}"</h4>
+                                    <button onClick={() => setHandbookTopicResults(null)} className="text-sm font-semibold text-blue-300 hover:text-blue-200">Close</button>
+                                </div>
+                                {Object.keys(handbookTopicResults).length > 0 ? (
+                                    Object.entries(handbookTopicResults).map(([title, text]) => (
+                                        <div key={title} className="mt-2 p-3 bg-gray-700 rounded-lg">
+                                            <h5 className="font-bold text-blue-300">{title}</h5>
+                                            <div className="mt-1 border-t border-gray-600 pt-1">
+                                                <HighlightedText text={text} highlight={handbookTopicQuery} />
+                                            </div>
                                         </div>
                                     ))
                                 ) : <p className="mt-2 text-gray-400">No results found.</p>}
