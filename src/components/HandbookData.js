@@ -1,4 +1,4 @@
-export const handbookData = [
+export const HandbookData = [
   // Section 1: Introduction
   {
     id: "1",
