@@ -1537,8 +1537,12 @@ export default function App() {
         { section: "6. Code of Conduct", vulnerabilities: [{ text: <span>The Student-Employee Relationship policy (<SectionLink number="6.3" onLinkClick={onSectionLinkClick} />) needs explicit rules regarding social media interaction (friending, following, direct messaging).</span>, source: "Handbook Audit", date: "2025-07-02" }] },
     ];
 
-    const fullHandbookText = Object.values(handbookSectionLanguage).join("\n\n");
-
+    // This new code correctly gathers all subsection text for the AI
+const fullHandbookText = handbook
+    .flatMap(section => section.subsections)
+    .map(subsection => subsection.content)
+    .join("\n\n");
+    
     const handleLegalQaSubmit = async () => {
         const questionText = legalQuestion;
         if (!questionText || !GEMINI_API_KEY) {
