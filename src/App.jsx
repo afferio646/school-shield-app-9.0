@@ -60,15 +60,16 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
         return text;
     }
 
-    // More robust regex to find sections, case law, and bold text
-    const sectionSrc = '(?:\\*\\s*)?Section\\s\\d+(?:\\.\\d+)?'; // Handles optional leading "*"
+    // Final, most robust regex to find all variations of links
+    const sectionSrc = '(?:\\*\\s*)?Sections?\\s\\d+(?:\\.\\d+)?'; // Handles "Section" or "Sections" and optional "*"
     const caseLawSrc = '\\*[^*]+\\s?v\\.\\s?[^*]+\\*';
     const boldSrc = '\\*\\*.*?\\*\\*';
 
-    const combinedRegex = new RegExp(`(${sectionSrc}|${caseLawSrc}|${boldSrc})`, 'g');
+    // The combined regex now looks for any of these patterns
+    const combinedRegex = new RegExp(`(${sectionSrc}|${caseLawSrc}|${boldSrc})`, 'gi');
 
-    // Regexes to test the captured parts
-    const sectionRegex = new RegExp(sectionSrc);
+    // Individual regexes to test the captured parts
+    const sectionRegex = new RegExp(sectionSrc, 'i'); // Case-insensitive
     const caseLawRegex = new RegExp(`^${caseLawSrc}$`);
     const boldRegex = new RegExp(`^${boldSrc}$`);
 
@@ -78,7 +79,7 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
     return (
         <>
             {parts.map((part, i) => {
-                // Test for Section Link (now more flexible)
+                // Test for Section Link (now handles plurals and different contexts)
                 if (sectionRegex.test(part)) {
                     const sectionNumberMatch = part.match(/(\d+(\.\d+)?)/);
                     if (sectionNumberMatch) {
@@ -90,7 +91,7 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
                         );
                     }
                 }
-
+                
                 // Test for Case Law Link
                 if (caseLawRegex.test(part)) {
                     const caseName = part.slice(1, -1);
@@ -105,8 +106,8 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
                     }
                     return <strong key={i} className="text-[#faecc4]">{innerText}</strong>;
                 }
-
-                // Return plain text if no match
+                
+                // Return plain text if no other pattern matches
                 return <span key={i}>{part}</span>;
             })}
         </>
