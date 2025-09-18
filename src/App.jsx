@@ -1519,7 +1519,7 @@ export default function App() {
         } else {
             console.warn(`Could not find handbook section for number: ${sectionNumber}`);
         }
-    }, []);
+    }, [handbook]);
 
     const handleCloseLegalJournal = () => {
         setIsLegalJournalOpen(false);
