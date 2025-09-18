@@ -424,10 +424,10 @@ function ArchivedReportsCard({ reports, onViewReport }) {
 // --- Risk Assessment & Mitigation Center Component --- //
 function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey }) {
     const getSectionText = (sectionId) => {
-    const section = handbookSectionLanguage.find(sec => sec.id === sectionId);
-    if (!section) return "Section not found.";
-    return section.subsections.map(sub => sub.content).join("\n\n");
-};
+        const section = handbookSectionLanguage.find(sec => sec.id === sectionId);
+        if (!section) return "Section not found.";
+        return section.subsections.map(sub => sub.content).join("\n\n");
+    };
     const [loading, setLoading] = useState(false);
     const [activeLoader, setActiveLoader] = useState(null);
     const [viewMode, setViewMode] = useState('form');
@@ -511,7 +511,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
             }
         }
     }
-}), [onSectionLinkClick, handbookSectionLanguage]);
+    }), [onSectionLinkClick, handbookSectionLanguage]);
 
     const handleScenarioButtonClick = (scenarioKey) => {
         const issueText = archivedReports.find(r => r.scenarioKey === scenarioKey)?.issue || '';
@@ -519,21 +519,18 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         setResponseGenerated(false);
         setGeneratedSteps(null);
         setOpenSteps({});
-        setOpenSubOptions({}); // Reset sub-option memory
+        setOpenSubOptions({});
         setViewMode('demo');
         setSelectedScenarioKey(scenarioKey);
     };
-const handleGenerate = async (isUpdate = false) => {
-        if (!issue) return;
 
+    const handleGenerate = async (isUpdate = false) => {
+        if (!issue) return;
         setLoading(true);
         setActiveLoader(isUpdate ? 'update' : 'new');
-
-        // This block now runs for BOTH new and updated analyses to clear old results.
         setResponseGenerated(false);
         setGeneratedSteps(null);
         setOpenSteps({});
-
         if (!isUpdate) {
             setOpenSubOptions({});
         }
@@ -582,7 +579,6 @@ const handleGenerate = async (isUpdate = false) => {
             --- END OF HANDBOOK SOURCE MATERIALS ---
             **User-Provided Scenario:** "${issue}"
         `;
-
         const responseSchema = {
             type: "OBJECT",
             properties: { "step1": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step2": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step3": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step4": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step5": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step6": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "recommendationSummary": { "type": "STRING" }, "implementationSteps": { "type": "ARRAY", "items": { "type": "STRING" } } }, required: ["recommendationSummary", "implementationSteps"] } }, required: ["title", "content"] } }, required: ["step1", "step2", "step3", "step4", "step5", "step6"] };
@@ -597,7 +593,6 @@ const handleGenerate = async (isUpdate = false) => {
                     temperature: 0.2
                 }
             };
-
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -637,154 +632,9 @@ const handleGenerate = async (isUpdate = false) => {
         }
     };
 
-    setViewMode('live');
-    if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
-        setGeneratedSteps({ error: "API key is not configured. Please add your API key to the App.jsx file." });
-        setResponseGenerated(true);
-        setLoading(false);
-        setActiveLoader(null);
-        return;
-    }
-
-    const sourceMaterials = handbookText;
-
-    // --- NEW, MORE ROBUST PROMPT ---
-    const prompt = `
-        You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
-
-        **CRITICAL INSTRUCTIONS:**
-        1.  Your entire response MUST be a single, valid JSON object and nothing else.
-        2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
-            -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
-            -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
-            -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
-        3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
-            -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
-            -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
-            -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
-        4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
-        5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
-        6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
-
-        --- START OF HANDBOOK SOURCE MATERIALS ---
-        ${sourceMaterials}
-        --- END OF HANDBOOK SOURCE MATERIALS ---
-
-        **User-Provided Scenario:** "${issue}"
-    `;
-
-    const responseSchema = {
-        type: "OBJECT",
-        properties: {
-            "step1": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] },
-            "step2": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] },
-            "step3": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] },
-            "step4": {
-                type: "OBJECT",
-                properties: {
-                    "title": { "type": "STRING" },
-                    "content": {
-                        type: "OBJECT",
-                        properties: {
-                            "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] },
-                            "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] },
-                            "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }
-                        },
-                        required: ["optionA", "optionB", "optionC"]
-                    }
-                },
-                required: ["title", "content"]
-            },
-            "step5": {
-                type: "OBJECT",
-                properties: {
-                    "title": { "type": "STRING" },
-                    "content": {
-                        type: "OBJECT",
-                        properties: {
-                            "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] },
-                            "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] },
-                            "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }
-                        },
-                        required: ["optionA", "optionB", "optionC"]
-                    }
-                },
-                required: ["title", "content"]
-            },
-            "step6": {
-                type: "OBJECT",
-                properties: {
-                    "title": { "type": "STRING" },
-                    "content": {
-                        type: "OBJECT",
-                        properties: {
-                            "recommendationSummary": { "type": "STRING" },
-                            "implementationSteps": { "type": "ARRAY", "items": { "type": "STRING" } }
-                        },
-                        required: ["recommendationSummary", "implementationSteps"]
-                    }
-                },
-                required: ["title", "content"]
-            }
-        },
-        required: ["step1", "step2", "step3", "step4", "step5", "step6"]
-    };
-
-    try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
-        const payload = {
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: responseSchema,
-                temperature: 0.2
-            }
-        };
-
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.status === 503) {
-            setFallbackMessage("The live AI model is temporarily unavailable. Displaying a pre-built demonstration scenario.");
-            const scenarioKey = 'parentComplaint'; // Default fallback
-            setGeneratedSteps(scenarios[scenarioKey]);
-            setViewMode('demo');
-            setResponseGenerated(true);
-            return;
-        }
-
-        if (!response.ok) {
-            const errorBody = await response.json();
-            throw new Error(`API request failed: ${response.status} - ${errorBody?.error?.message || 'Unknown error'}`);
-        }
-
-        const result = await response.json();
-        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-            const jsonText = result.candidates[0].content.parts[0].text;
-            const parsedSteps = JSON.parse(jsonText);
-            setGeneratedSteps(parsedSteps);
-            setResponseGenerated(true);
-        } else {
-            throw new Error("Invalid response structure from API.");
-        }
-    } catch (error) {
-        console.error("Error generating AI response:", error);
-        setGeneratedSteps({ error: `Failed to generate AI response. ${error.message}. Please check your API key and network connection.` });
-        setResponseGenerated(true);
-    } finally {
-        setLoading(false);
-        setActiveLoader(null);
-    }
-};
-
-
     const handleStepToggle = (stepKey) => {
         const isOpening = !openSteps[stepKey];
         setOpenSteps(prev => ({ ...prev, [stepKey]: !prev[stepKey] }));
-
         if (isOpening) {
             setTimeout(() => {
                 stepRefs.current[stepKey]?.scrollIntoView({
@@ -801,12 +651,11 @@ const handleGenerate = async (isUpdate = false) => {
         setIssue("");
         setSelectedScenarioKey(null);
         setOpenSteps({});
-        setOpenSubOptions({}); // Reset sub-option memory
+        setOpenSubOptions({});
     };
 
     const StepCard = React.memo(React.forwardRef(function StepCard({ title, stepKey, children, isOpen, onToggle, onLegalLinkClick, onSectionLinkClick, openSubOptions, onSubOptionToggle }, ref) {
         const [isAnalyzing, setIsAnalyzing] = useState(false);
-
         const handleToggle = () => {
             if (isOpen) {
                 onToggle();
@@ -818,13 +667,11 @@ const handleGenerate = async (isUpdate = false) => {
                 }, 750);
             }
         };
-
         const buttonText = isOpen ? "Close" : (isAnalyzing ? "Analyzing..." : "Analyze");
         const stepNumber = parseInt(stepKey.replace('step', ''));
-
         const renderContent = () => {
-             return (
-                 <AIContentRenderer
+            return (
+                <AIContentRenderer
                     content={children}
                     onSectionLinkClick={onSectionLinkClick}
                     onLegalLinkClick={onLegalLinkClick}
@@ -836,30 +683,27 @@ const handleGenerate = async (isUpdate = false) => {
                         )
                     }
                     onOptionToggle={(optionKey) => onSubOptionToggle(stepKey, optionKey)}
-                 />
-             );
+                />
+            );
         };
-
         return (
             <div ref={ref}>
                 <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64" }}>
                     <div className="p-6 space-y-4 rounded-2xl" style={{ color: "#fff" }}>
                         <h2 className="text-xl font-semibold" style={{ color: "#faecc4" }}>{`Step ${stepNumber}: ${title}`}</h2>
-
                         {isOpen && (
-                             <div className="border-t border-gray-600 pt-4">
-                                 {renderContent()}
-                                 {stepKey === 'step6' && (
-                                     <div className="border-t border-gray-600 mt-6 pt-6">
-                                         <h3 className="text-lg font-semibold text-[#faecc4] mb-2 flex items-center"><Gavel className="w-5 h-5 mr-2"/>Get Direct Legal Help</h3>
-                                         <div className="mb-3 text-sm"> Reach out for legal advice about this issue. Begin by adding a brief overview below, and click submit to schedule a phone conference.<br /> <span className="text-blue-400 text-xs">(Annual Legal Counsel Credits will be applied if applicable.)</span> </div>
-                                         <textarea className="w-full min-h-[100px] border rounded-md mb-2 p-2 text-black" placeholder={`Add any additional details for the legal team regarding: "${issue}"`} style={{ background: "#fff", border: "2px solid #faecc4" }} />
-                                         <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg mt-2" > Submit &amp; Schedule Call </button>
-                                     </div>
-                                 )}
-                             </div>
+                            <div className="border-t border-gray-600 pt-4">
+                                {renderContent()}
+                                {stepKey === 'step6' && (
+                                    <div className="border-t border-gray-600 mt-6 pt-6">
+                                        <h3 className="text-lg font-semibold text-[#faecc4] mb-2 flex items-center"><Gavel className="w-5 h-5 mr-2"/>Get Direct Legal Help</h3>
+                                        <div className="mb-3 text-sm"> Reach out for legal advice about this issue. Begin by adding a brief overview below, and click submit to schedule a phone conference.<br /> <span className="text-blue-400 text-xs">(Annual Legal Counsel Credits will be applied if applicable.)</span> </div>
+                                        <textarea className="w-full min-h-[100px] border rounded-md mb-2 p-2 text-black" placeholder={`Add any additional details for the legal team regarding: "${issue}"`} style={{ background: "#fff", border: "2px solid #faecc4" }} />
+                                        <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg mt-2" > Submit &amp; Schedule Call </button>
+                                    </div>
+                                )}
+                            </div>
                         )}
-
                         <div className="flex justify-start mt-4">
                             <button
                                 onClick={handleToggle}
@@ -878,12 +722,10 @@ const handleGenerate = async (isUpdate = false) => {
    return (
         <div className="p-6 space-y-6 max-w-6xl mx-auto text-base">
             <h1 className="text-3xl font-bold text-center">IQ Risk Assessment Center</h1>
-
             <div className="flex justify-center gap-2 mb-4">
                 <button onClick={() => handleScenarioButtonClick('parentComplaint')} className={`px-4 py-2 rounded-md ${selectedScenarioKey === 'parentComplaint' ? 'bg-blue-700 text-white' : 'bg-gray-300 text-black'}`}>Parent Complaint Demo</button>
                 <button onClick={() => handleScenarioButtonClick('facultyLeave')} className={`px-4 py-2 rounded-md ${selectedScenarioKey === 'facultyLeave' ? 'bg-blue-700 text-white' : 'bg-gray-300 text-black'}`}>Faculty Leave Demo</button>
             </div>
-
             <div className="shadow-2xl border-2 border-blue-100 rounded-2xl" style={{ background: "#4B5C64" }}>
                 <div className="p-6 space-y-4 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
                     <label className="block font-medium">Describe Details of the Complaint or Issue - (Allow 30 seconds for the comprehensive Analysis)</label>
@@ -902,7 +744,6 @@ const handleGenerate = async (isUpdate = false) => {
                             setViewMode('live');
                         }}
                     />
-
                     <div className="flex justify-center gap-4 mt-4">
                         {responseGenerated ? (
                             <button
@@ -926,19 +767,17 @@ const handleGenerate = async (isUpdate = false) => {
                             disabled={loading || !issue || !responseGenerated}
                             className={`px-6 py-2 text-lg font-semibold text-white rounded-md shadow-md transition-colors ${loading || !issue || !responseGenerated ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
                         >
-                             {loading && activeLoader === 'update' ? "Analyzing..." : "Update & Analyze"}
+                           {loading && activeLoader === 'update' ? "Analyzing..." : "Update & Analyze"}
                         </button>
                     </div>
                 </div>
             </div>
-
             {fallbackMessage && (
                 <div className="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md">
                     <p className="font-bold">Notice</p>
                     <p>{fallbackMessage}</p>
                 </div>
             )}
-
             {responseGenerated && generatedSteps && (
                 <div className="space-y-6">
                     {generatedSteps.error ? (
@@ -968,8 +807,6 @@ const handleGenerate = async (isUpdate = false) => {
                     )}
                 </div>
             )}
-
-
             <ArchivedReportsCard reports={archivedReports} onViewReport={setViewedReport} />
             {viewedReport && <ReportViewerModal report={viewedReport} scenarios={scenarios} onClose={() => setViewedReport(null)} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />}
         </div>
