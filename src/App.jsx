@@ -422,7 +422,7 @@ function ArchivedReportsCard({ reports, onViewReport }) {
 // --- Page Components ---
 
 // --- Risk Assessment & Mitigation Center Component --- //
-function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick }) {
+function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey }) {
     const getSectionText = (sectionId) => {
     const section = handbookSectionLanguage.find(sec => sec.id === sectionId);
     if (!section) return "Section not found.";
