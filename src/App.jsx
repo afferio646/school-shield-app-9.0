@@ -1669,20 +1669,24 @@ const fullHandbookText = useMemo(() => {
 
     // --- MAIN PAGE RENDERING LOGIC ---
     const renderPage = () => {
-        if (reviewingUpdate) {
-            const sectionKey = Object.keys(handbook).find(key => key.startsWith(reviewingUpdate.affectedSection.split(' ')[0]));
-            const sectionText = handbook[sectionKey];
+       // PASTE THIS NEW VERSION IN ITS PLACE
+if (reviewingUpdate) {
+    const sectionIdToFind = reviewingUpdate.affectedSection.split('.')[0];
+    const section = handbook.find(s => s.id === sectionIdToFind);
+    const sectionText = section 
+        ? section.subsections.map(sub => sub.content).join('\n\n') 
+        : "Error: Could not load the original handbook section text.";
 
-            return <ReviewUpdate
-                onViewAlertDetail={setViewedAlert}
-                update={reviewingUpdate}
-                handbookSectionText={sectionText}
-                onApprove={handleApproveUpdate}
-                onArchive={handleArchiveUpdate}
-                onDismiss={handleDismissUpdate}
-                onClose={() => setReviewingUpdate(null)}
-            />;
-        }      
+    return <ReviewUpdate
+        onViewAlertDetail={setViewedAlert}
+        update={reviewingUpdate}
+        handbookSectionText={sectionText}
+        onApprove={handleApproveUpdate}
+        onArchive={handleArchiveUpdate}
+        onDismiss={handleDismissUpdate}
+        onClose={() => setReviewingUpdate(null)}
+    />;
+}
 
         switch (page) {
             case 'dashboard':
