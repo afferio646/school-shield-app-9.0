@@ -121,6 +121,7 @@ export default function Handbook({
                     <label className="block font-medium mb-1 text-gray-200">Select Section to review the entire section language</label>
                     {/* CORRECTED DROPDOWN MENU LOGIC */}
                     <select
+                        size="10"
                         className="block w-full border rounded p-2 shadow text-black mb-2"
                         value={selectedSubsectionId}
                         onChange={e => { setSelectedSubsectionId(e.target.value); setIsSectionLanguageOpen(true); }}
