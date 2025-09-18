@@ -31,6 +31,9 @@ export default function ContactSupportModal({ onClose }) {
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
+                        <p className="text-sm text-gray-600 mb-4">
+                         Send us a detailed request or message and we will be in contact within 24 hours.
+                         </p>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Your Name</label>
