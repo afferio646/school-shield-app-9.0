@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu } from "lucide-react";
+import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, Lifebuoy } from "lucide-react";
 
 // --- COMPONENT IMPORTS ---
 import HandbookComparisonCard from './components/HandbookComparisonCard.jsx';
@@ -11,6 +11,8 @@ import Handbook from './components/Handbook.jsx';
 import AlertDetailModal from './components/AlertDetailModal.jsx';
 import AttendanceModal from './components/AttendanceModal.jsx';
 import { HandbookData } from './components/HandbookData.js';
+import ContactSupportModal from './components/ContactSupportModal.jsx';
+
 
 // --- SECURE API KEY HANDLING ---
 const GEMINI_API_KEY = "AIzaSyCYAfKVJ9BTLWHpNLDr0bHDsvYOdWMfIpw";
@@ -1283,6 +1285,8 @@ export default function App() {
       const [riskGeneratedSteps, setRiskGeneratedSteps] = useState(null);
       const [riskSelectedScenarioKey, setRiskSelectedScenarioKey] = useState(null);          
       const [events, setEvents] = useState([
+      const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+      const [page, setPage] = useState('dashboard');
         { 
             date: '2025-09-09', 
             title: 'Head of School - Town Hall',
@@ -1580,6 +1584,7 @@ const fullHandbookText = useMemo(() => {
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
         { key: "hosqa", label: "IQ School Leaders Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> }
+        { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
     ];
 
     // --- MAIN PAGE RENDERING LOGIC ---
@@ -1754,8 +1759,13 @@ const fullHandbookText = useMemo(() => {
                                 borderColor: "#fff"
                             }}
                             onClick={() => {
-                                setPage(link.key);
-                                setIsMobileMenuOpen(false);
+                               if (link.key === 'support') {
+                               setIsSupportModalOpen(true);
+                               } else {
+                               setPage(link.key);
+                               }
+                               setIsMobileMenuOpen(false);
+                            }}
                             }}
                         >
                             {React.cloneElement(link.icon, { color: page === link.key ? "#fff" : "#7c2d2d" })}
