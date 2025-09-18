@@ -996,35 +996,8 @@ function HighlightedText({ text, highlight }) {
 // --- DATA ---
 
 
-// PASTE THIS NEW VERSION IN ITS PLACE
-const findSectionByNumber = (numberStr) => {
-    if (!numberStr || !handbook) return null;
 
-    for (const section of handbook) {
-        for (const subsection of section.subsections) {
-            if (subsection.id === numberStr) {
-                // We found the exact subsection (e.g., 3.4)
-                return {
-                    title: `${subsection.id} ${subsection.title}`,
-                    content: subsection.content
-                };
-            }
-        }
-    }
 
-    // If no exact subsection is found, try to find the main section (e.g., 3)
-    const mainSectionNumber = numberStr.split('.')[0];
-    const mainSection = handbook.find(section => section.id === mainSectionNumber);
-    if (mainSection) {
-        return {
-            title: `${main.id} ${mainSection.title}`,
-            // Join all subsection content for a full view of the main section
-            content: mainSection.subsections.map(sub => `--- ${sub.id} ${sub.title} ---\n\n${sub.content}`).join('\n\n')
-        };
-    }
-
-    return null;
-};
 
 function LEGAL({
     legalQuestion,
@@ -1517,6 +1490,34 @@ export default function App() {
     { id: 23, category: 'Student, Parent & Faculty Handbook Policy Questions', question: 'Do you allow faculty to babysit or tutor current students outside of school? What policy language do you use?', answer: 'Solution: Many schools prohibit or strongly discourage this to avoid dual-role conflicts of interest. A policy should clearly state the school\'s position and require disclosure and approval from a division head if exceptions are considered.' },
     { id: 27, category: 'Governance and Board Topics', question: 'Who signs the annual tuition increase letter: Head, Board Chair, Business Officer, or someone else?', answer: 'Solution: The Board Chair should sign the letter, as setting tuition is a primary fiduciary responsibility of the Board. The Head of School may be a co-signer to show administrative support for the decision.' },
     ]);
+    const findSectionByNumber = (numberStr) => {
+    if (!numberStr || !handbook) return null;
+
+    for (const section of handbook) {
+        for (const subsection of section.subsections) {
+            if (subsection.id === numberStr) {
+                // We found the exact subsection (e.g., 3.4)
+                return {
+                    title: `${subsection.id} ${subsection.title}`,
+                    content: subsection.content
+                };
+            }
+        }
+    }
+
+    // If no exact subsection is found, try to find the main section (e.g., 3)
+    const mainSectionNumber = numberStr.split('.')[0];
+    const mainSection = handbook.find(section => section.id === mainSectionNumber);
+    if (mainSection) {
+        return {
+            title: `${main.id} ${mainSection.title}`,
+            // Join all subsection content for a full view of the main section
+            content: mainSection.subsections.map(sub => `--- ${sub.id} ${sub.title} ---\n\n${sub.content}`).join('\n\n')
+        };
+    }
+
+    return null;
+};
     const handleOpenLegalJournal = useCallback((caseName) => {
         setLegalJournalQuery(caseName);
         setIsLegalJournalOpen(true);
