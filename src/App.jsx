@@ -1679,25 +1679,25 @@ const fullHandbookText = useMemo(() => {
     ];
 
     // --- MAIN PAGE RENDERING LOGIC ---
+// --- MAIN PAGE RENDERING LOGIC ---
     const renderPage = () => {
-       // PASTE THIS NEW VERSION IN ITS PLACE
-if (reviewingUpdate) {
-    const sectionIdToFind = reviewingUpdate.affectedSection.split('.')[0];
-    const section = handbook.find(s => s.id === sectionIdToFind);
-    const sectionText = section 
-        ? section.subsections.map(sub => sub.content).join('\n\n') 
-        : "Error: Could not load the original handbook section text.";
+        if (reviewingUpdate) {
+            const sectionIdToFind = reviewingUpdate.affectedSection.split('.')[0];
+            const section = handbook.find(s => s.id === sectionIdToFind);
+            const sectionText = section 
+                ? section.subsections.map(sub => sub.content).join('\n\n') 
+                : "Error: Could not load the original handbook section text.";
 
-    return <ReviewUpdate
-        onViewAlertDetail={setViewedAlert}
-        update={reviewingUpdate}
-        handbookSectionText={sectionText}
-        onApprove={handleApproveUpdate}
-        onArchive={handleArchiveUpdate}
-        onDismiss={handleDismissUpdate}
-        onClose={() => setReviewingUpdate(null)}
-    />;
-}
+            return <ReviewUpdate
+                onViewAlertDetail={setViewedAlert}
+                update={reviewingUpdate}
+                handbookSectionText={sectionText}
+                onApprove={handleApproveUpdate}
+                onArchive={handleArchiveUpdate}
+                onDismiss={handleDismissUpdate}
+                onClose={() => setReviewingUpdate(null)}
+            />;
+        }      
 
         switch (page) {
             case 'dashboard':
@@ -1714,23 +1714,19 @@ if (reviewingUpdate) {
 
            case 'handbook':
                return <Handbook
-                    onViewAlertDetail={setViewedAlert}
-                    handbookContent={handbook}
-                    pendingUpdates={pendingUpdates}
-                    archivedUpdates={archivedUpdates}
-                    monitoredTrends={monitoredTrends}
-                    onViewUpdate={setReviewingUpdate}
-                    apiKey={GEMINI_API_KEY}
-                    HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
-                    // ADD THESE TWO PROPS TO PROVIDE DATA TO THE RESTORED SECTIONS
-                    handbookSections={handbookSections}
-                    onSectionLinkClick={handleSectionLinkClick}
-                />;
+                   onViewAlertDetail={setViewedAlert}
+                   handbookContent={handbook}
+                   pendingUpdates={pendingUpdates}
+                   archivedUpdates={archivedUpdates}
+                   monitoredTrends={monitoredTrends}
+                   onViewUpdate={setReviewingUpdate}
+                   apiKey={GEMINI_API_KEY}
+                   HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
+                   handbookSections={handbookSections}
+                   onSectionLinkClick={handleSectionLinkClick}
+               />;
 
             case 'calendar':
-                // This is the updated call to the CALENDAR component.
-                // It now passes all the necessary state and functions down,
-                // making the CALENDAR a "controlled" component.
                 return <CALENDAR 
                     events={events}
                     view={calendarView}
@@ -1742,8 +1738,10 @@ if (reviewingUpdate) {
                 return <HOSQA
                     industryQuestions={industryQuestions}
                     setIndustryQuestions={setIndustryQuestions}
+                    // --- THESE TWO LINES WERE MISSING ---
                     onSectionLinkClick={handleSectionLinkClick}
                     onLegalLinkClick={handleOpenLegalJournal}
+                    // --- END OF FIX ---
                     submittedQuestion={submittedQuestion}
                     setSubmittedQuestion={setSubmittedQuestion}
                     isAnalyzing={isAnalyzing}
