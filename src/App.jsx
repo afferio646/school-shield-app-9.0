@@ -1584,7 +1584,7 @@ const fullHandbookText = useMemo(() => {
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
         { key: "hosqa", label: "IQ School Leaders Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
-        { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
+        { key: "support", label: "Contact Support", icon: <Lifebuoy className="w-5 h-5" /> }
     ];
 
     // --- MAIN PAGE RENDERING LOGIC ---
