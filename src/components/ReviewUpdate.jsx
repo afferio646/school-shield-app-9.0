@@ -156,7 +156,7 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
                                     <p className="text-gray-400 italic border-b border-dashed border-gray-600 pb-2 mb-2">Original Text Reference:</p>
                                     <p className="text-gray-400 text-xs opacity-70 max-h-20 overflow-y-auto">{handbookSectionText}</p>
                                     <p className="text-yellow-300 italic border-b border-dashed border-gray-600 pb-2 my-2">Suggested Addition:</p>
-                                    <p className="bg-blue-900 text-blue-200 p-2 rounded-md my-1 block">{suggestedLanguage}</p>
+                                   <p className="bg-blue-900 text-blue-200 p-2 rounded-md my-1 block max-h-40 overflow-y-auto">{suggestedLanguage}</p>
                                 </div>
                             )}
                         </div>
