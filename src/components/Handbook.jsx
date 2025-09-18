@@ -4,10 +4,42 @@ import { BookOpen, Search, AlertCircle, TrendingUp, ClipboardCheck, ChevronDown 
 import PolicyWatchtower from './PolicyWatchtower.jsx';
 import HandbookComparisonCard from './HandbookComparisonCard.jsx';
 
-// (Helper components can remain as they are)
-function HighlightedText({ text, highlight }) { /* ... */ }
-function HandbookAuditCard() { /* ... */ }
-function SectionHeader({ icon, title }) { /* ... */ }
+// Helper component for search result highlighting
+function HighlightedText({ text, highlight }) {
+    if (!highlight || !text) return <p className="text-sm leading-relaxed whitespace-pre-line">{text}</p>;
+    const regex = new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (<p className="text-sm leading-relaxed whitespace-pre-line">{parts.map((part, i) => regex.test(part) ? <span key={i} className="bg-yellow-300 font-bold text-black px-1 rounded">{part}</span> : part)}</p>);
+}
+
+// Full code for the Audit Card
+function HandbookAuditCard() {
+    return (
+        <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64" }}>
+            <div className="p-6 text-white">
+                <SectionHeader icon={<ClipboardCheck className="text-[#faecc4]" size={26} />} title="IQ Handbook Audit" />
+                <div className="space-y-3 text-gray-200">
+                    <p className="font-semibold">"Comprehensive Handbook Intelligence Audit - Ensuring Policy Excellence & Legal Compliance"</p>
+                    <p>A systematic, multi-source analysis of your school handbook leveraging industry-leading databases, federal & state legislative monitoring, peer benchmarking from multiple schools, and expert legal review.</p>
+                </div>
+                <div className="flex flex-wrap gap-4 mt-6">
+                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Audit Quarterly</button>
+                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Audit Annually</button>
+                    <button className="bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-800">Our 6-Stage Audit Process</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SectionHeader({ icon, title }) {
+    return (
+        <div className="flex items-center gap-3 mb-4">
+            {icon}
+            <h2 className="text-xl font-bold text-white">{title}</h2>
+        </div>
+    );
+}
 
 export default function Handbook({
     handbookContent,
