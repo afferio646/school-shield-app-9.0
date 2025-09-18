@@ -1595,6 +1595,7 @@ const fullHandbookText = useMemo(() => {
             return <ReviewUpdate
                 onViewAlertDetail={setViewedAlert}
                 update={reviewingUpdate}
+                apiKey={GEMINI_API_KEY}
                 handbookSectionText={sectionText}
                 onApprove={handleApproveUpdate}
                 onArchive={handleArchiveUpdate}
