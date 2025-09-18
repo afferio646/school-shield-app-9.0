@@ -1561,11 +1561,14 @@ export default function App() {
         { section: "6. Code of Conduct", vulnerabilities: [{ text: <span>The Student-Employee Relationship policy (<SectionLink number="6.3" onLinkClick={onSectionLinkClick} />) needs explicit rules regarding social media interaction (friending, following, direct messaging).</span>, source: "Handbook Audit", date: "2025-07-02" }] },
     ];
 
-    // This new code correctly gathers all subsection text for the AI
-const fullHandbookText = handbook
-    .flatMap(section => section.subsections)
-    .map(subsection => subsection.content)
-    .join("\n\n");
+  // This code correctly gathers all subsection text for the AI and is wrapped in useMemo for efficiency
+const fullHandbookText = useMemo(() => {
+    if (!handbook || !Array.isArray(handbook)) return "";
+    return handbook
+        .flatMap(section => section.subsections)
+        .map(subsection => `Section ${subsection.id} ${subsection.title}\n${subsection.content}`)
+        .join("\n\n---\n\n");
+}, [handbook]);
     
     const handleLegalQaSubmit = async () => {
         const questionText = legalQuestion;
