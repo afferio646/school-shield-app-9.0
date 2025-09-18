@@ -529,12 +529,16 @@ const handleGenerate = async (isUpdate = false) => {
     setLoading(true);
     setActiveLoader(isUpdate ? 'update' : 'new');
 
-    // This is the corrected logic: it clears the old response for BOTH new and update actions.
+    // --- FIX ---
+    // This logic is now moved outside the 'if' condition.
+    // It clears the previous results for BOTH a new analysis and an update.
     setResponseGenerated(false);
     setGeneratedSteps(null);
     setOpenSteps({});
+    // --- END FIX ---
 
     if (!isUpdate) {
+        // We only reset the nested option toggles for a completely new query.
         setOpenSubOptions({});
     }
     setFallbackMessage("");
@@ -562,28 +566,29 @@ const handleGenerate = async (isUpdate = false) => {
     }
 
     const sourceMaterials = handbookText;
+
     const prompt = `
-    You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
+        You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
 
-    **CRITICAL INSTRUCTIONS:**
-    1.  Your entire response MUST be a single, valid JSON object and nothing else.
-    2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
-        -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
-        -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
-        -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
-    3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
-        -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
-        -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
-        -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
-    4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
-    5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
-    6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+        **CRITICAL INSTRUCTIONS:**
+        1.  Your entire response MUST be a single, valid JSON object and nothing else.
+        2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+            -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
+            -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
+            -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
+        3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+            -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
+            -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
+            -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+        4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
+        5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+        6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
 
-    --- START OF HANDBOOK SOURCE MATERIALS ---
-    ${sourceMaterials}
-    --- END OF HANDBOOK SOURCE MATERIALS ---
+        --- START OF HANDBOOK SOURCE MATERIALS ---
+        ${sourceMaterials}
+        --- END OF HANDBOOK SOURCE MATERIALS ---
 
-    **User-Provided Scenario:** "${issue}"
+        **User-Provided Scenario:** "${issue}"
     `;
 
     const responseSchema = {
