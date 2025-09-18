@@ -165,10 +165,11 @@ export default function Handbook({
                 </div>
             </div>
             
-            <HandbookVulnerabilitiesCardComponent />
+           
+            <HandbookVulnerabilitiesCardComponent sections={handbookSections} onSectionLinkClick={onSectionLinkClick} />
             <HandbookComparisonCard apiKey={apiKey} />
             <HandbookAuditCard /> 
-
+          
             {showSuggestionModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
                     {/* ... Suggestion Modal JSX ... */}
