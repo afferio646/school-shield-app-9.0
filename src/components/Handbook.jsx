@@ -179,7 +179,7 @@ export default function Handbook({
                                     handbookTopicResults.map((result) => (
                                         <div key={result.id} className="mt-2 p-3 bg-gray-700 rounded-lg">
                                             <h5 className="font-bold text-blue-300">{result.id} {result.title}</h5>
-                                            <div className="mt-1 border-t border-gray-600 pt-1">
+                                           <div className="mt-1 border-t border-gray-600 pt-1 max-h-48 overflow-y-auto">
                                                 <HighlightedText text={result.content} highlight={handbookTopicQuery} />
                                             </div>
                                         </div>
