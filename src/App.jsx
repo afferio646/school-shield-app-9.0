@@ -60,13 +60,15 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
         return text;
     }
 
-    const sectionSrc = 'Section\\s\\d+(?:\\.\\d+)?';
+    // More robust regex to find sections, case law, and bold text
+    const sectionSrc = '(?:\\*\\s*)?Section\\s\\d+(?:\\.\\d+)?'; // Handles optional leading "*"
     const caseLawSrc = '\\*[^*]+\\s?v\\.\\s?[^*]+\\*';
     const boldSrc = '\\*\\*.*?\\*\\*';
 
     const combinedRegex = new RegExp(`(${sectionSrc}|${caseLawSrc}|${boldSrc})`, 'g');
 
-    const sectionRegex = new RegExp(`^${sectionSrc}$`);
+    // Regexes to test the captured parts
+    const sectionRegex = new RegExp(sectionSrc);
     const caseLawRegex = new RegExp(`^${caseLawSrc}$`);
     const boldRegex = new RegExp(`^${boldSrc}$`);
 
@@ -76,20 +78,26 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
     return (
         <>
             {parts.map((part, i) => {
+                // Test for Section Link (now more flexible)
                 if (sectionRegex.test(part)) {
-                    const sectionNumber = part.match(/(\d+(\.\d+)?)/)[0];
-                    return (
-                        <SectionLink key={i} number={sectionNumber} onLinkClick={onSectionLinkClick}>
-                            {part}
-                        </SectionLink>
-                    );
+                    const sectionNumberMatch = part.match(/(\d+(\.\d+)?)/);
+                    if (sectionNumberMatch) {
+                        const sectionNumber = sectionNumberMatch[0];
+                        return (
+                            <SectionLink key={i} number={sectionNumber} onLinkClick={onSectionLinkClick}>
+                                {part}
+                            </SectionLink>
+                        );
+                    }
                 }
-                
+
+                // Test for Case Law Link
                 if (caseLawRegex.test(part)) {
                     const caseName = part.slice(1, -1);
                     return <LegalLink key={i} name={caseName} onLegalLinkClick={onLegalLinkClick} />;
                 }
 
+                // Test for Bold Text (which could be a Statute)
                 if (boldRegex.test(part)) {
                     const innerText = part.slice(2, -2);
                     if (statuteKeywords.some(keyword => innerText.includes(keyword))) {
@@ -97,7 +105,8 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
                     }
                     return <strong key={i} className="text-[#faecc4]">{innerText}</strong>;
                 }
-                
+
+                // Return plain text if no match
                 return <span key={i}>{part}</span>;
             })}
         </>
