@@ -1283,10 +1283,10 @@ export default function App() {
       const [riskIssue, setRiskIssue] = useState("");
       const [riskResponseGenerated, setRiskResponseGenerated] = useState(false);
       const [riskGeneratedSteps, setRiskGeneratedSteps] = useState(null);
-      const [riskSelectedScenarioKey, setRiskSelectedScenarioKey] = useState(null);          
-      const [events, setEvents] = useState([
+      const [riskSelectedScenarioKey, setRiskSelectedScenarioKey] = useState(null); 
       const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-      const [page, setPage] = useState('dashboard');
+      const [events, setEvents] = useState([
+          
         { 
             date: '2025-09-09', 
             title: 'Head of School - Town Hall',
