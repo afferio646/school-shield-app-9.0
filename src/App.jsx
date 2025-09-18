@@ -1583,7 +1583,7 @@ const fullHandbookText = useMemo(() => {
         { key: "handbook", label: "IQ Handbook Center", icon: <BookOpen className="w-5 h-5" /> },
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
         { key: "hosqa", label: "IQ School Leaders Q&A", icon: <MessageCircle className="w-5 h-5" /> },
-        { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> }
+        { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
         { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
     ];
 
