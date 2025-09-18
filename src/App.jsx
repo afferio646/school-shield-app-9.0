@@ -1356,11 +1356,11 @@ const CALENDAR = ({ events = [], view, onViewChange, setAttendingEvent }) => {
 export default function App() {
       const [page, setPage] = useState('dashboard');
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-      // This state is now the single source of truth for the calendar view
       const [calendarView, setCalendarView] = useState('list'); 
-
-      // REMOVED `handleSetAttendingEvent` function as it's no longer needed.
-      
+      const [riskIssue, setRiskIssue] = useState("");
+      const [riskResponseGenerated, setRiskResponseGenerated] = useState(false);
+      const [riskGeneratedSteps, setRiskGeneratedSteps] = useState(null);
+      const [riskSelectedScenarioKey, setRiskSelectedScenarioKey] = useState(null);          
       const [events, setEvents] = useState([
         { 
             date: '2025-09-09', 
@@ -1687,13 +1687,22 @@ const fullHandbookText = useMemo(() => {
                 return <Dashboard />;
 
             case 'risk':
-                return <RiskAssessmentCenter 
-                    handbookText={fullHandbookText} 
-                    apiKey={GEMINI_API_KEY} 
-                    handbookSectionLanguage={handbook} 
-                    onSectionLinkClick={handleSectionLinkClick} 
-                    onLegalLinkClick={handleOpenLegalJournal} 
-                />;
+    return <RiskAssessmentCenter 
+        handbookText={fullHandbookText} 
+        apiKey={GEMINI_API_KEY} 
+        handbookSectionLanguage={handbook} 
+        onSectionLinkClick={handleSectionLinkClick} 
+        onLegalLinkClick={handleOpenLegalJournal}
+        // --- ADD THESE PROPS TO CONNECT THE STATE ---
+        issue={riskIssue}
+        setIssue={setRiskIssue}
+        responseGenerated={riskResponseGenerated}
+        setResponseGenerated={setRiskResponseGenerated}
+        generatedSteps={riskGeneratedSteps}
+        setGeneratedSteps={setRiskGeneratedSteps}
+        selectedScenarioKey={riskSelectedScenarioKey}
+        setSelectedScenarioKey={setRiskSelectedScenarioKey}
+    />;
 
            case 'handbook':
                return <Handbook
