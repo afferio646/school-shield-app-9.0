@@ -1447,7 +1447,7 @@ export default function App() {
     // Modal State
     const [legalJournalQuery, setLegalJournalQuery] = useState("");
     const [isLegalJournalOpen, setIsLegalJournalOpen] = useState(false);
-    const [handbook, setHandbook] = useState(handbookData);
+    const [handbook, setHandbook] = useState(HandbookData);
 
     const [pendingUpdates, setPendingUpdates] = useState([
     { 
