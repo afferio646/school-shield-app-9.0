@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, Lifebuoy } from "lucide-react";
+import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, LifeBuoy } from "lucide-react";
 
 // --- COMPONENT IMPORTS ---
 import HandbookComparisonCard from './components/HandbookComparisonCard.jsx';
