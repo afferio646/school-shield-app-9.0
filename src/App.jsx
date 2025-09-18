@@ -986,14 +986,33 @@ function HighlightedText({ text, highlight }) {
 // --- DATA ---
 
 
+// PASTE THIS NEW VERSION IN ITS PLACE
 const findSectionByNumber = (numberStr) => {
-    if (!numberStr) return null;
-    const mainSectionNumber = numberStr.split('.')[0];
-    const sectionTitle = Object.keys(handbookSectionLanguage).find(key => key.startsWith(mainSectionNumber + '.'));
+    if (!numberStr || !handbook) return null;
 
-    if (sectionTitle) {
-        return { title: sectionTitle, content: handbookSectionLanguage[sectionTitle] };
+    for (const section of handbook) {
+        for (const subsection of section.subsections) {
+            if (subsection.id === numberStr) {
+                // We found the exact subsection (e.g., 3.4)
+                return {
+                    title: `${subsection.id} ${subsection.title}`,
+                    content: subsection.content
+                };
+            }
+        }
     }
+
+    // If no exact subsection is found, try to find the main section (e.g., 3)
+    const mainSectionNumber = numberStr.split('.')[0];
+    const mainSection = handbook.find(section => section.id === mainSectionNumber);
+    if (mainSection) {
+        return {
+            title: `${main.id} ${mainSection.title}`,
+            // Join all subsection content for a full view of the main section
+            content: mainSection.subsections.map(sub => `--- ${sub.id} ${sub.title} ---\n\n${sub.content}`).join('\n\n')
+        };
+    }
+
     return null;
 };
 
