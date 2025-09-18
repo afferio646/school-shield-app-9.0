@@ -1765,8 +1765,7 @@ const fullHandbookText = useMemo(() => {
                                setPage(link.key);
                                }
                                setIsMobileMenuOpen(false);
-                            }}
-                            }}
+                              }}
                         >
                             {React.cloneElement(link.icon, { color: page === link.key ? "#fff" : "#7c2d2d" })}
                             {link.label}
