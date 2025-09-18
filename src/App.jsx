@@ -519,8 +519,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         setViewMode('demo');
         setSelectedScenarioKey(scenarioKey);
     };
-
-   const handleGenerate = async (isUpdate = false) => {
+const handleGenerate = async (isUpdate = false) => {
     if (!issue) return;
 
     setLoading(true);
@@ -557,28 +556,29 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
 
     const sourceMaterials = handbookText;
 
+    // --- NEW, MORE ROBUST PROMPT ---
     const prompt = `
-        Role: You are an expert K-12 risk assessment analyst and legal advisor. Your function is to analyze a scenario and populate a JSON object based on provided source materials. Your tone is professional, clear, and authoritative. Your analysis must be robust and detailed, mirroring the complexity of a real-world legal and administrative consultation for a school leader.
-        Task: Read the User-Provided Scenario and the Source Materials. Populate a JSON object that strictly follows the provided schema.
-        CRITICAL RULES:
-        1.  Your entire response MUST be only the populated JSON object. No other text.
-        2.  For 'legalReference', you MUST follow this **three-step internal process**:
-            **Step A: Identify Legal Concepts and relevant Keywords used in the issue or complaint.** First, analyze the 'User-Provided Scenario' and then identify the core legal concepts involved using the keywords relevant to the complaint or issue (e.g., 'pay equity,' 'at-will employment,' 'constructive discharge,' 'harassment.')
-            **Step B: Find a School-Specific Case or Statute.** Second, find a real, verifiable court case from a **K-12 public or independent school context** OR a controlling federal/state statute that deals with the concepts from Step A. Your search should prioritize sources like Justia, Casetext, Westlaw, and the Legal Information Institute.
-            **Step C: Justify and Format the Selection.** Third, in your final output, you **MUST format the case name in italics by wrapping it in single asterisks** (e.g., *Case Name v. Defendant*) OR **format the statute name in bold by wrapping it in double asterisks** (e.g., **Title IX of the Education Amendments of 1972**), followed by a concise explanation that explicitly connects the legal principle to the complaint or issue.
-            **Fallback Rule:** If you cannot find a relevant school-specific case or statute, you MUST state, "No direct K-12 case law was found for this specific issue." and cite the relevant general legal principle. Providing irrelevant references is an absolute failure.
-        3.  For 'suggestedLanguage' in Step 4, you MUST provide a full, robust paragraph of professional language suitable for a Head of School to use. Do not use single sentences.
-        4.  The output must be as detailed and robust as a professional consultant's report. Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information.
-        5.  When referencing a handbook policy, use the format "Section X.Y". The user interface will automatically link this text.
-        6.  **For Steps 1, 2, 3:** The 'content' MUST be an array of objects, each with a 'header' key (e.g., "Issue Type:") and a 'text' key (e.g., "Parent Complaint").
-        7.  **For Step 4 & 5:** The 'content' must be an object with keys "optionA", "optionB", "optionC". Each option must be an object with its own title and various text properties. The projected reactions in Step 5 must be nuanced and explain potential consequences.
-        8.  **For Step 6:** The 'recommendationSummary' MUST be a string formatted with bolded headers like this: "**Recommended Option:** [Option]\\n**Why:** [Explanation]\\n**Confidence Level:** [Level]\\n**Legal Review Advised:** [Yes/No and when]". The 'implementationSteps' MUST be a clear, actionable checklist as an array of strings, with each string being a complete sentence for a single step, prefixed with its number (e.g., "1. Do this first.").
-        9.  **NEW CRITICAL RULE:** When you find a handbook policy in the source material like "2.4 Non-Discrimination and Harassment", your response MUST ONLY use the section number format (e.g., "Section 2.4"). DO NOT include the policy title (like "Non-Discrimination and Harassment") or repeat the section number in your output.
-        10. **DO NOT INVENT SPECIFIC DETAILS.** Your response must ONLY use information from the "User-Provided Scenario." Do not add specific names (e.g., "Jane Doe"), dates (e.g., "October 26, 2023"), or locations unless they are in the user's query. If details are needed but not provided, use generic placeholders like "[Complainant Name]," "[Date of Incident]," or "[Location]."
-        --- START OF SOURCE MATERIALS ---
+        You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
+
+        **CRITICAL INSTRUCTIONS:**
+        1.  Your entire response MUST be a single, valid JSON object and nothing else.
+        2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+            -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
+            -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
+            -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
+        3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+            -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
+            -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
+            -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+        4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
+        5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+        6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+
+        --- START OF HANDBOOK SOURCE MATERIALS ---
         ${sourceMaterials}
-        --- END OF SOURCE MATERIALS ---
-        User-Provided Scenario: "${issue}"
+        --- END OF HANDBOOK SOURCE MATERIALS ---
+
+        **User-Provided Scenario:** "${issue}"
     `;
 
     const responseSchema = {
@@ -687,6 +687,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         setActiveLoader(null);
     }
 };
+
 
     const handleStepToggle = (stepKey) => {
         const isOpening = !openSteps[stepKey];
