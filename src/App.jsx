@@ -428,12 +428,9 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
     if (!section) return "Section not found.";
     return section.subsections.map(sub => sub.content).join("\n\n");
 };
-    const [issue, setIssue] = useState("");
-    const [responseGenerated, setResponseGenerated] = useState(false);
     const [loading, setLoading] = useState(false);
     const [activeLoader, setActiveLoader] = useState(null);
     const [viewMode, setViewMode] = useState('form');
-    const [selectedScenarioKey, setSelectedScenarioKey] = useState(null);
     const [openSteps, setOpenSteps] = useState({});
     const [openSubOptions, setOpenSubOptions] = useState({});
     const [archivedReports, setArchivedReports] = useState([
@@ -441,7 +438,6 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         { id: 2, title: "Non-renewed faculty member wants to use sick days as vacation", date: "August 10, 2025", scenarioKey: 'facultyLeave', issue: "Non-renewed faculty member wants to use sick days as vacation before departure." }
     ]);
     const [viewedReport, setViewedReport] = useState(null);
-    const [generatedSteps, setGeneratedSteps] = useState(null);
     const [fallbackMessage, setFallbackMessage] = useState("");
     const stepRefs = useRef({});
 
