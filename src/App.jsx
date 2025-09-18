@@ -1301,11 +1301,11 @@ export default function App() {
         },
         { 
             date: '2025-09-15', 
-            title: 'Board of Trustees Meeting',
+            title: 'Governance Topics & Strategies',
             eventType: 'School Meeting',
             category: 'Governance, Finance',
             location: 'Online',
-            description: 'Regularly scheduled meeting for the Board of Trustees to review financial reports, strategic goals, and committee updates.'
+            description: 'School leaders are invited to review governance issues and solutions, financial reporting, strategic goals, and industry updates.'
         },
         { 
             date: '2025-09-25', 
