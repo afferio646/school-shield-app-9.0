@@ -123,6 +123,7 @@ export default function Handbook({
 
     const handleCloseSection = () => {
         setIsSectionLanguageOpen(false);
+        setSelectedSubsectionId("");
     }
     
     const currentVulnerabilities = selectedSubsection && handbookSections ? (handbookSections(onSectionLinkClick).find(s => s.section.startsWith(selectedSubsection.id.split('.')[0]))?.vulnerabilities || []) : [];
