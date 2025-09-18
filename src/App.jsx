@@ -1807,6 +1807,7 @@ const fullHandbookText = useMemo(() => {
             {attendingEvent && (
                 <AttendanceModal event={attendingEvent} onClose={() => setAttendingEvent(null)} />
             )}
+            {isSupportModalOpen && <ContactSupportModal onClose={() => setIsSupportModalOpen(false)} />}
         </div>
     );
 }
