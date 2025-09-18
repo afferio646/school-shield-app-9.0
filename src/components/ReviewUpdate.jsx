@@ -1,29 +1,93 @@
-import React from 'react';
-import { FileText, Lightbulb, Check, Archive, X, ArrowLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { FileText, Lightbulb, Check, Archive, X, ArrowLeft, LoaderCircle } from "lucide-react";
 
-// The new onViewAlertDetail prop is added here
+const GEMINI_API_KEY = "AIzaSyCYAfKVJ9BTLWHpNLDr0bHDsvYOdWMfIpw"; // Your API Key
+
 export default function ReviewUpdate({ update, handbookSectionText, onApprove, onArchive, onDismiss, onClose, onViewAlertDetail }) {
     
-    // Helper to render the handbook text with the new suggestion highlighted
-    const renderProposedChange = () => {
-        if (!handbookSectionText) {
-            return <p className="text-red-400">Error: Could not load the original handbook section text.</p>;
-        }
-        
-        // Find the last newline to append the suggestion cleanly
-        const lastNewlineIndex = handbookSectionText.lastIndexOf('\n');
-        const beforeSuggestion = handbookSectionText.slice(0, lastNewlineIndex + 1);
-        const afterSuggestion = handbookSectionText.slice(lastNewlineIndex + 1);
+    // State to hold the AI-generated suggestion
+    const [suggestedLanguage, setSuggestedLanguage] = useState("");
+    const [isGenerating, setIsGenerating] = useState(true);
+    const [error, setError] = useState("");
 
-        return (
-            <div className="text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                <span className="text-gray-400">{beforeSuggestion}</span>
-                <span className="text-gray-400">{afterSuggestion}</span>
-                {/* The new language is highlighted for clarity */}
-                <span className="bg-blue-900 text-blue-200 p-1 rounded-md my-1 block">{update.suggestedLanguage}</span>
-            </div>
-        );
-    };
+    useEffect(() => {
+        // Function to generate the AI suggestion
+        const generateSuggestion = async () => {
+            if (!handbookSectionText || handbookSectionText.startsWith("Error:")) {
+                setError("Cannot generate a suggestion because the original handbook text is missing.");
+                setIsGenerating(false);
+                return;
+            }
+
+            setIsGenerating(true);
+            setError("");
+
+            const prompt = `
+                You are an expert legal and policy advisor for K-12 independent schools.
+                An issue has been identified that requires a policy update.
+                
+                ISSUE DETAILS:
+                - Title: ${update.title}
+                - Rationale: ${update.rationale}
+                - Source of Alert: ${update.sourceText || 'A new legal or regulatory development.'}
+
+                ORIGINAL HANDBOOK TEXT (from section "${update.affectedSection}"):
+                ---
+                ${handbookSectionText}
+                ---
+
+                YOUR TASK:
+                Draft a concise, legally sound paragraph to be added to the handbook. This new language must directly resolve the issue described in the alert.
+
+                RULES:
+                1. Your response MUST be ONLY the new paragraph of suggested text.
+                2. Do NOT include conversational phrases like "Here is the suggestion:".
+                3. Do NOT repeat or rephrase the original policy text.
+                4. The new paragraph should be ready to be copied and pasted directly into the handbook.
+            `;
+
+            try {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.4,
+                        maxOutputTokens: 500,
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+                const generatedText = result.candidates[0]?.content?.parts[0]?.text;
+                
+                if (generatedText) {
+                    setSuggestedLanguage(generatedText.trim());
+                } else {
+                    throw new Error("Received an empty response from the AI.");
+                }
+
+            } catch (err) {
+                console.error("AI Generation Error:", err);
+                setError(`Failed to generate suggestion. ${err.message}`);
+            } finally {
+                setIsGenerating(false);
+            }
+        };
+
+        generateSuggestion();
+    }, [update, handbookSectionText]); // Re-run if the update or text changes
+
+    // A new update object that includes the generated language for the onApprove function
+    const updatedSuggestion = { ...update, suggestedLanguage: suggestedLanguage };
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -33,7 +97,6 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
             </button>
 
             <div className="bg-[#4B5C64] text-white p-6 rounded-2xl shadow-2xl">
-                {/* --- CHANGE 1: Title has been renamed --- */}
                 <h1 className="text-3xl font-bold text-[#faecc4] mb-2">Review Proposed Handbook Change</h1>
                 <p className="text-gray-300 mb-6">Analyze the generated suggestion and choose an action.</p>
 
@@ -45,7 +108,6 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
                             <FileText size={20} /> IQ Alert
                         </h2>
                         <div className="text-gray-200 flex-grow">
-                            {/* --- CHANGE 2: The alert title is now a clickable button --- */}
                             <button 
                                 onClick={() => onViewAlertDetail(update)} 
                                 className="font-semibold text-left w-full hover:text-blue-300 transition-colors"
@@ -79,8 +141,24 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
                         <h2 className="flex items-center gap-2 text-lg font-bold text-yellow-300 mb-3 border-b border-gray-600 pb-2">
                            IQ Suggested Handbook Change/Addition
                         </h2>
-                        <div className="bg-gray-900 p-3 rounded-md max-h-60 overflow-y-auto flex-grow">
-                            {renderProposedChange()}
+                        <div className="bg-gray-900 p-3 rounded-md min-h-[150px] overflow-y-auto flex-grow flex flex-col justify-center">
+                            {isGenerating && (
+                                <div className="text-center text-gray-400 animate-pulse">
+                                    <LoaderCircle className="mx-auto mb-2" />
+                                    <p>Generating suggestion...</p>
+                                </div>
+                            )}
+                            {error && (
+                                <p className="text-red-400 text-sm">{error}</p>
+                            )}
+                            {!isGenerating && !error && (
+                                <div className="text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                                    <p className="text-gray-400 italic border-b border-dashed border-gray-600 pb-2 mb-2">Original Text Reference:</p>
+                                    <p className="text-gray-400 text-xs opacity-70 max-h-20 overflow-y-auto">{handbookSectionText}</p>
+                                    <p className="text-yellow-300 italic border-b border-dashed border-gray-600 pb-2 my-2">Suggested Addition:</p>
+                                    <p className="bg-blue-900 text-blue-200 p-2 rounded-md my-1 block">{suggestedLanguage}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -88,8 +166,9 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
                 {/* --- Action Buttons --- */}
                 <div className="mt-8 pt-6 border-t border-gray-600 flex flex-wrap items-center justify-center gap-4">
                     <button 
-                        onClick={() => onApprove(update)}
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-transform transform hover:scale-105"
+                        onClick={() => onApprove(updatedSuggestion)}
+                        disabled={isGenerating || !!error}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:transform-none disabled:cursor-not-allowed"
                     >
                         <Check size={20} />
                         Approve & Add to Handbook
