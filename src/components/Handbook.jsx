@@ -205,10 +205,21 @@ export default function Handbook({
                             {isAnalyzingTopic ? 'Analyzing...' : 'Analyze Handbook'}
                         </button>
                         {handbookTopicResults && (
-                            <div className="mt-4">
-                                {/* Topic Search Results Logic */}
-                            </div>
-                        )}
+                         <div className="mt-6 space-y-4">
+                         {handbookTopicResults.length > 0 ? (
+                         handbookTopicResults.map(result => (
+                         <div key={result.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 transition-all duration-300 ease-in-out">
+                          <h4 className="font-bold text-md text-[#faecc4] mb-2">{result.id} {result.title}</h4>
+                           <HighlightedText text={result.content} highlight={handbookTopicQuery} />
+                          </div>
+                           ))
+                         ) : (
+                         <div className="bg-gray-800 p-4 rounded-lg text-center text-gray-400">
+                         <p>No sections found matching your topic.</p>
+            </div>
+        )}
+    </div>
+)}
                     </div>
                 </div>
             </div>
