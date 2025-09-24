@@ -105,28 +105,29 @@ export default function Handbook({
     const handleTopicSearch = () => {
         if (!handbookTopicQuery) return;
         setIsAnalyzingTopic(true);
-        setHandbookTopicResults(null);
-        setTimeout(() => {
-            const query = handbookTopicQuery.toLowerCase();
-            const results = [];
-            handbookContent.forEach(section => {
-                section.subsections.forEach(subsection => {
-                    if (subsection.content.toLowerCase().includes(query)) {
-                        results.push(subsection);
-                    }
-                });
+
+        const query = handbookTopicQuery.toLowerCase();
+        const results = [];
+        handbookContent.forEach(section => {
+            section.subsections.forEach(subsection => {
+                if (subsection.content.toLowerCase().includes(query)) {
+                    results.push(subsection);
+                }
             });
-            setHandbookTopicResults(results);
-            setIsAnalyzingTopic(false);
-        }, 1500);
+        });
+        
+        setHandbookTopicResults(results);
+        setIsAnalyzingTopic(false);
     };
-           const handleCloseSearch = () => {
-           setHandbookTopicResults(null);
+
+    const handleCloseSearch = () => {
+        setHandbookTopicResults(null);
     };
+
     const handleCloseSection = () => {
         setIsSectionLanguageOpen(false);
         setSelectedSubsectionId("");
-    }
+    };
     
     const currentVulnerabilities = selectedSubsection && handbookSections ? (handbookSections(onSectionLinkClick).find(s => s.section.startsWith(selectedSubsection.id.split('.')[0]))?.vulnerabilities || []) : [];
 
@@ -246,3 +247,4 @@ export default function Handbook({
             )}
         </div>
     );
+}
