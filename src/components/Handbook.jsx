@@ -206,31 +206,34 @@ export default function Handbook({
                         <button onClick={handleTopicSearch} disabled={isAnalyzingTopic} className="bg-blue-700 text-white font-semibold px-5 py-2 mt-2 rounded-lg shadow hover:bg-blue-800 disabled:bg-gray-500">
                             {isAnalyzingTopic ? 'Analyzing...' : 'Analyze Handbook'}
                         </button>
+                        
                         {handbookTopicResults && (
-    <div className="mt-6 space-y-4">
-        {handbookTopicResults.length > 0 ? (
-            handbookTopicResults.map(result => (
-                <div key={result.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 transition-all duration-300 ease-in-out">
-                    <h4 className="font-bold text-md text-[#faecc4] mb-2">{result.id} {result.title}</h4>
-                    <HighlightedText text={result.content} highlight={handbookTopicQuery} />
+                            <div className="mt-6 space-y-4">
+                                {handbookTopicResults.length > 0 ? (
+                                    handbookTopicResults.map(result => (
+                                        <div key={result.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 transition-all duration-300 ease-in-out">
+                                            <h4 className="font-bold text-md text-[#faecc4] mb-2">{result.id} {result.title}</h4>
+                                            <HighlightedText text={result.content} highlight={handbookTopicQuery} />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="bg-gray-800 p-4 rounded-lg text-center text-gray-400">
+                                        <p>No sections found matching your topic.</p>
+                                    </div>
+                                )}
+
+                                <button 
+                                    onClick={handleCloseSearch} 
+                                    className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2 float-right"
+                                >
+                                    Close Results
+                                </button>
+
+                            </div>
+                        )}
+                    </div>
                 </div>
-            ))
-        ) : (
-            <div className="bg-gray-800 p-4 rounded-lg text-center text-gray-400">
-                <p>No sections found matching your topic.</p>
             </div>
-        )}
-
-        {/* The button goes here, right before the container's closing div tag */}
-        <button 
-            onClick={handleCloseSearch} 
-            className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2 float-right"
-        >
-            Close Results
-        </button>
-
-    </div> // <-- This is the correct closing div for the main container
-)}
             
             <HandbookVulnerabilitiesCardComponent sections={handbookSections} onSectionLinkClick={onSectionLinkClick} />
             <HandbookComparisonCard apiKey={apiKey} />
@@ -243,4 +246,3 @@ export default function Handbook({
             )}
         </div>
     );
-}
