@@ -78,6 +78,7 @@ export default function Handbook({
     const [showSuggestionModal, setShowSuggestionModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const searchSectionRef = useRef(null); // Ref to control scrolling
 
     const getSubsectionById = (id) => {
         if (!handbookContent || !Array.isArray(handbookContent)) return null;
@@ -122,6 +123,9 @@ export default function Handbook({
 
     const handleCloseSearch = () => {
         setHandbookTopicResults(null);
+        setHandbookTopicQuery(""); // Clears the search box text
+        // Scrolls the view smoothly back to the search box, preventing the "jump"
+        searchSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const handleCloseSection = () => {
@@ -131,122 +135,122 @@ export default function Handbook({
     
     const currentVulnerabilities = selectedSubsection && handbookSections ? (handbookSections(onSectionLinkClick).find(s => s.section.startsWith(selectedSubsection.id.split('.')[0]))?.vulnerabilities || []) : [];
 
-   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-        <PolicyWatchtower
-            pendingUpdates={pendingUpdates}
-            archivedUpdates={archivedUpdates}
-            monitoredTrends={monitoredTrends}
-            onViewUpdate={onViewUpdate}
-            onViewAlertDetail={onViewAlertDetail}
-        />
+    return (
+        <div className="max-w-4xl mx-auto space-y-8">
+            <PolicyWatchtower
+                pendingUpdates={pendingUpdates}
+                archivedUpdates={archivedUpdates}
+                monitoredTrends={monitoredTrends}
+                onViewUpdate={onViewUpdate}
+                onViewAlertDetail={onViewAlertDetail}
+            />
 
-        <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64" }}>
-            <div className="p-6 text-white">
-                <SectionHeader icon={<BookOpen className="text-[#faecc4]" size={26} />} title="Handbook Section Review" />
-                
-                <h3 className="text-lg font-bold mb-2 text-[#faecc4]">1. Review by Section</h3>
-                <label className="block font-medium mb-1 text-gray-200">Select Section to review the entire section language</label>
-                
-                <div className="relative" ref={dropdownRef}>
-                    <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="w-full bg-white text-black p-2 rounded shadow flex justify-between items-center text-left"
-                    >
-                        <span className="truncate">
-                            {selectedSubsection ? `${selectedSubsection.id} ${selectedSubsection.title}` : "-- Select a Section to Review --"}
-                        </span>
-                        <ChevronDown size={20} />
-                    </button>
-
-                    {isDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border max-h-60 overflow-y-auto">
-                            {handbookContent && Array.isArray(handbookContent) && handbookContent.map(section => (
-                                <div key={section.id}>
-                                    <div className="px-3 py-2 text-sm font-bold text-gray-500 bg-gray-100">{section.title}</div>
-                                    {section.subsections.map(subsection => (
-                                        <button
-                                            key={subsection.id}
-                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
-                                            onClick={() => {
-                                                setSelectedSubsectionId(subsection.id);
-                                                setIsSectionLanguageOpen(true);
-                                                setIsDropdownOpen(false);
-                                            }}
-                                        >
-                                            {subsection.id} {subsection.title}
-                                        </button>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                
-                {isSectionLanguageOpen && selectedSubsection && (
-                    <>
-                        <div className="bg-gray-800 p-4 rounded-lg mt-4 shadow-inner border border-gray-700 whitespace-pre-line text-gray-200" style={{ maxHeight: "320px", overflowY: "auto" }}>
-                            {selectedSubsection.content}
-                        </div>
-                        <button className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2" onClick={handleCloseSection}>
-                            Close Section
-                        </button>
-                    </>
-                )}
-
-                {selectedSubsection && (
-                    <div className="mt-6 border-t border-gray-600 pt-4">
-                        {/* Vulnerabilities display logic can go here */}
-                    </div>
-                )}
-                
-                <div className="mt-8 border-t border-gray-600 pt-6">
-                    <h3 className="text-lg font-bold mb-2 text-[#faecc4]">2. Search Handbook by Topic</h3>
-                    <p className="text-gray-300 mb-2">Enter a topic to find relevant language in the handbook.</p>
-                    <textarea className="w-full min-h-[80px] p-2 rounded-md text-black" placeholder="e.g., Confidentiality, Remote Work, Discipline..." value={handbookTopicQuery} onChange={(e) => setHandbookTopicQuery(e.target.value)} />
-                    <button onClick={handleTopicSearch} disabled={isAnalyzingTopic} className="bg-blue-700 text-white font-semibold px-5 py-2 mt-2 rounded-lg shadow hover:bg-blue-800 disabled:bg-gray-500">
-                        {isAnalyzingTopic ? 'Analyzing...' : 'Analyze Handbook'}
-                    </button>
+            <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64" }}>
+                <div className="p-6 text-white">
+                    <SectionHeader icon={<BookOpen className="text-[#faecc4]" size={26} />} title="Handbook Section Review" />
                     
-                    {handbookTopicResults && (
-                        <div className="mt-6 space-y-4">
-                            {handbookTopicResults.length > 0 ? (
-                                handbookTopicResults.map(result => (
-                                    <div key={result.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 transition-all duration-300 ease-in-out">
-                                        <h4 className="font-bold text-md text-[#faecc4] mb-2">{result.id} {result.title}</h4>
-                                        <HighlightedText text={result.content} highlight={handbookTopicQuery} />
+                    <h3 className="text-lg font-bold mb-2 text-[#faecc4]">1. Review by Section</h3>
+                    <label className="block font-medium mb-1 text-gray-200">Select Section to review the entire section language</label>
+                    
+                    <div className="relative" ref={dropdownRef}>
+                        <button
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="w-full bg-white text-black p-2 rounded shadow flex justify-between items-center text-left"
+                        >
+                            <span className="truncate">
+                                {selectedSubsection ? `${selectedSubsection.id} ${selectedSubsection.title}` : "-- Select a Section to Review --"}
+                            </span>
+                            <ChevronDown size={20} />
+                        </button>
+
+                        {isDropdownOpen && (
+                            <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border max-h-60 overflow-y-auto">
+                                {handbookContent && Array.isArray(handbookContent) && handbookContent.map(section => (
+                                    <div key={section.id}>
+                                        <div className="px-3 py-2 text-sm font-bold text-gray-500 bg-gray-100">{section.title}</div>
+                                        {section.subsections.map(subsection => (
+                                            <button
+                                                key={subsection.id}
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                                                onClick={() => {
+                                                    setSelectedSubsectionId(subsection.id);
+                                                    setIsSectionLanguageOpen(true);
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                            >
+                                                {subsection.id} {subsection.title}
+                                            </button>
+                                        ))}
                                     </div>
-                                ))
-                            ) : (
-                                <div className="bg-gray-800 p-4 rounded-lg text-center text-gray-400">
-                                    <p>No sections found matching your topic.</p>
-                                </div>
-                            )}
-
-                            {/* --- CORRECTED BUTTON PLACEMENT --- */}
-                            <div className="flex justify-end">
-                                <button 
-                                    onClick={handleCloseSearch} 
-                                    className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2"
-                                >
-                                    Close Results
-                                </button>
+                                ))}
                             </div>
+                        )}
+                    </div>
+                    
+                    {isSectionLanguageOpen && selectedSubsection && (
+                        <>
+                            <div className="bg-gray-800 p-4 rounded-lg mt-4 shadow-inner border border-gray-700 whitespace-pre-line text-gray-200" style={{ maxHeight: "320px", overflowY: "auto" }}>
+                                {selectedSubsection.content}
+                            </div>
+                            <button className="text-sm font-semibold text-blue-300 hover:text-blue-200 mt-2" onClick={handleCloseSection}>
+                                Close Section
+                            </button>
+                        </>
+                    )}
 
+                    {selectedSubsection && (
+                        <div className="mt-6 border-t border-gray-600 pt-4">
+                            {/* Vulnerabilities display logic can go here */}
                         </div>
                     )}
+                    
+                    <div ref={searchSectionRef} className="mt-8 border-t border-gray-600 pt-6">
+                        <h3 className="text-lg font-bold mb-2 text-[#faecc4]">2. Search Handbook by Topic</h3>
+                        <p className="text-gray-300 mb-2">Enter a topic to find relevant language in the handbook.</p>
+                        <textarea className="w-full min-h-[80px] p-2 rounded-md text-black" placeholder="e.g., Confidentiality, Remote Work, Discipline..." value={handbookTopicQuery} onChange={(e) => setHandbookTopicQuery(e.target.value)} />
+                        <button onClick={handleTopicSearch} disabled={isAnalyzingTopic} className="bg-blue-700 text-white font-semibold px-5 py-2 mt-2 rounded-lg shadow hover:bg-blue-800 disabled:bg-gray-500">
+                            {isAnalyzingTopic ? 'Analyzing...' : 'Analyze Handbook'}
+                        </button>
+                        
+                        {handbookTopicResults && (
+                            <div className="mt-6 space-y-4">
+                                {handbookTopicResults.length > 0 ? (
+                                    handbookTopicResults.map(result => (
+                                        <div key={result.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 transition-all duration-300 ease-in-out">
+                                            <h4 className="font-bold text-md text-[#faecc4] mb-2">{result.id} {result.title}</h4>
+                                            <HighlightedText text={result.content} highlight={handbookTopicQuery} />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="bg-gray-800 p-4 rounded-lg text-center text-gray-400">
+                                        <p>No sections found matching your topic.</p>
+                                    </div>
+                                )}
+
+                                <div className="w-full flex justify-end pt-2">
+                                    <button 
+                                        onClick={handleCloseSearch} 
+                                        className="text-sm font-semibold text-blue-300 hover:text-blue-200"
+                                    >
+                                        Close Results
+                                    </button>
+                                </div>
+
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <HandbookVulnerabilitiesCardComponent sections={handbookSections} onSectionLinkClick={onSectionLinkClick} />
-        <HandbookComparisonCard apiKey={apiKey} />
-        <HandbookAuditCard /> 
+            
+            <HandbookVulnerabilitiesCardComponent sections={handbookSections} onSectionLinkClick={onSectionLinkClick} />
+            <HandbookComparisonCard apiKey={apiKey} />
+            <HandbookAuditCard /> 
 
-        {showSuggestionModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                {/* Suggestion Modal JSX */}
-            </div>
-        )}
-    </div>
-);
+            {showSuggestionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    {/* Suggestion Modal JSX */}
+                </div>
+            )}
+        </div>
+    );
+}
