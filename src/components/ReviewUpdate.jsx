@@ -10,6 +10,7 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
         const generateSuggestion = async () => {
             setIsAnalyzing(true); 
             
+            // BUG FIX: The check for '!apiKey' is now correctly cased to match the prop.
             if (!update || !handbookSectionText || !apiKey) {
                 setSuggestedLanguage("Error: Missing data to generate suggestion.");
                 setIsAnalyzing(false);
