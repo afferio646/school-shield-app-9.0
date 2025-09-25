@@ -552,7 +552,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         }
 
         setViewMode('live');
-        if (!apiKey || apiKey === "YOUR_API_KEY_HERE") {
+       if (!apiKey) {
             setGeneratedSteps({ error: "API key is not configured. Please add your API key to the App.jsx file." });
             setResponseGenerated(true);
             setLoading(false);
@@ -1491,7 +1491,7 @@ const fullHandbookText = useMemo(() => {
     
     const handleLegalQaSubmit = async () => {
         const questionText = legalQuestion;
-        if (!questionText || !GEMINI_API_KEY) {
+       if (!questionText || !apiKey) {
              alert("Please provide a question and ensure your API key is set.");
             return;
         }
@@ -1543,7 +1543,7 @@ const fullHandbookText = useMemo(() => {
                     responseSchema: legalResponseSchema
                 }
             };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -1600,7 +1600,7 @@ const fullHandbookText = useMemo(() => {
             return <ReviewUpdate
                 onViewAlertDetail={setViewedAlert}
                 update={reviewingUpdate}
-                apiKey={GEMINI_API_KEY}
+               apiKey={apiKey}
                 handbookSectionText={sectionText}
                 onApprove={handleApproveUpdate}
                 onArchive={handleArchiveUpdate}
@@ -1616,7 +1616,7 @@ const fullHandbookText = useMemo(() => {
             case 'risk':
     return <RiskAssessmentCenter 
         handbookText={fullHandbookText} 
-        apiKey={GEMINI_API_KEY} 
+        apiKey={apiKey} 
         handbookSectionLanguage={handbook} 
         onSectionLinkClick={handleSectionLinkClick} 
         onLegalLinkClick={handleOpenLegalJournal}
@@ -1639,7 +1639,7 @@ const fullHandbookText = useMemo(() => {
                    archivedUpdates={archivedUpdates}
                    monitoredTrends={monitoredTrends}
                    onViewUpdate={setReviewingUpdate}
-                   apiKey={GEMINI_API_KEY}
+                   apiKey={apiKey}
                    HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
                    handbookSections={handbookSections}
                    onSectionLinkClick={handleSectionLinkClick}
