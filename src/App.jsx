@@ -1800,7 +1800,7 @@ const fullHandbookText = useMemo(() => {
                 <LegalReferenceJournal
                     query={legalJournalQuery}
                     onClose={handleCloseLegalJournal}
-                    apiKey={GEMINI_API_KEY}
+                    apiKey={VITE_GEMINI_API_KEY}
                 />
             )}
             {viewedAlert && <AlertDetailModal alert={viewedAlert} onClose={() => setViewedAlert(null)} />}
