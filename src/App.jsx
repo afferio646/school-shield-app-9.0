@@ -15,7 +15,7 @@ import ContactSupportModal from './components/ContactSupportModal.jsx';
 
 
 // --- SECURE API KEY HANDLING ---
-const GEMINI_API_KEY = "AIzaSyDh-7tXjXG74zTphGR339zivaCpCa-XyVk";
+const VITE_GEMINI_API_KEY = "AIzaSyDh-7tXjXG74zTphGR339zivaCpCa-XyVk";
 
 // --- Helper Components ---
 
