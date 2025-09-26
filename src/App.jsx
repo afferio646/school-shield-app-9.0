@@ -15,7 +15,7 @@ import ContactSupportModal from './components/ContactSupportModal.jsx';
 
 
 // --- SECURE API KEY HANDLING ---
-const apiKey = process.env.VITE_GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 // --- Helper Components ---
 
