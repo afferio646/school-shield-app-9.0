@@ -30,7 +30,7 @@ export default function ReviewUpdate({ update, handbookSectionText, onApprove, o
                 INSTRUCTIONS:
                 Based on all the information above, write a single, concise paragraph of new policy language that addresses the issue described in the rationale and source text. This new paragraph will be ADDED to the existing handbook section. Do NOT rewrite the entire section. Only provide the new paragraph to be added. Your response must be ONLY the text of the new paragraph.
             `;
-            console.log("Checking API Key:", apiKey); 
+           
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`, {
                     method: 'POST',
