@@ -1794,11 +1794,7 @@ const fullHandbookText = useMemo(() => {
             <HandbookSectionModal section={modalSection} onClose={() => setModalSection(null)} />
             {isLegalJournalOpen && (
                 <LegalReferenceJournal
-                    query={legalJournalQuery}
-                    onClose={handleCloseLegalJournal}
-                    apiKey={apiKey}
-                />
-            )}
+                   {legalJournalData && <LegalReferenceJournal data={legalJournalData} onClose={() => setLegalJournalData(null)} />}
             {viewedAlert && <AlertDetailModal alert={viewedAlert} onClose={() => setViewedAlert(null)} />}
             {attendingEvent && (
                 <AttendanceModal event={attendingEvent} onClose={() => setAttendingEvent(null)} />
