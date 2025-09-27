@@ -21,7 +21,7 @@ Your entire response must be ONLY a raw JSON object (no markdown, no commentary)
 User Query: "${query}"`;
 
       try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
         
         const payload = {
           contents: [{ parts: [{ text: prompt }] }],
