@@ -730,7 +730,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
             </div>
             <div className="shadow-2xl border-2 border-blue-100 rounded-2xl" style={{ background: "#4B5C64" }}>
                 <div className="p-6 space-y-4 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
-                    <label className="block font-medium">Describe Details of the Complaint or Issue - (Allow 30 seconds for the comprehensive Analysis)</label>
+                    <label className="block font-medium">Describe Details of the Complaint or Issue - (Allow 30 to 60 seconds for the comprehensive Analysis)</label>
                     <textarea
                         className="w-full min-h-[140px] border-2 rounded-xl shadow-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-200 p-2 text-black"
                         style={{
