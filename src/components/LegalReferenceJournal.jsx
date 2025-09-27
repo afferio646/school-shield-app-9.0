@@ -13,18 +13,15 @@ export default function LegalReferenceJournal({ query, onClose, apiKey }) {
       setIsLoading(true);
       setError(null);
       
-      const prompt = `You are a legal research assistant. Your task is to perform a Google search for the user's query, which will be a legal case name. 
-You must return the top 3 search results. For each result, you must provide the title, the full URL, and a concise snippet. 
-Your entire response must be ONLY a raw JSON object (no markdown, no commentary) that strictly follows this schema: 
-{ "results": [{ "title": "string", "url": "string", "snippet": "string" }] }
-
-User Query: "${query}"`;
+      const prompt = `Based on your internal knowledge, provide a concise summary of the legal case: "${query}".`;
 
       try {
+        // --- CHANGE 1: Switched to the gemini-pro model ---
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
         
+        // --- CHANGE 2: Removed the incompatible 'tools' property ---
         const payload = {
-        contents: [{ parts: [{ text: prompt }] }],
+          contents: [{ parts: [{ text: prompt }] }],
         };
 
         const response = await fetch(apiUrl, {
@@ -41,22 +38,22 @@ User Query: "${query}"`;
 
         const result = await response.json();
         
-        if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
-            let rawText = result.candidates[0].content.parts[0].text;
-            
-            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) {
-                throw new Error("No valid JSON object found in the API response.");
-            }
-            
-            const jsonText = jsonMatch[0];
-            const parsedData = JSON.parse(jsonText);
-            setResults(parsedData.results || []);
+        // Simplified the response handling to be more direct
+        if (result.candidates && result.candidates[0].content) {
+            const part = result.candidates[0].content.parts[0];
+            // Since we are not asking for a Google Search, we will treat the response as plain text.
+            // We will create a single "result" object to display.
+            const summary = part.text;
+            const mockResult = {
+              title: query,
+              url: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+              snippet: summary,
+            };
+            setResults([mockResult]);
         } else {
             console.warn("API returned no valid candidates or content parts.");
             setResults([]);
         }
-
 
       } catch (err) {
         console.error("Error fetching legal data:", err);
