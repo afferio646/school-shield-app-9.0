@@ -24,8 +24,7 @@ User Query: "${query}"`;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
         
         const payload = {
-          contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ "google_search_retrieval": {} }],
+        contents: [{ parts: [{ text: prompt }] }],
         };
 
         const response = await fetch(apiUrl, {
