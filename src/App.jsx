@@ -1354,7 +1354,8 @@ export default function App() {
     const [handbookTopicResults, setHandbookTopicResults] = useState(null);
     const [isAnalyzingTopic, setIsAnalyzingTopic] = useState(false);
 
-    // Modal State
+   // Modal State
+    const [legalJournalData, setLegalJournalData] = useState(null); // <-- ADD THIS LINE
     const [legalJournalQuery, setLegalJournalQuery] = useState("");
     const [isLegalJournalOpen, setIsLegalJournalOpen] = useState(false);
     const [handbook, setHandbook] = useState(HandbookData);
@@ -1426,10 +1427,9 @@ export default function App() {
 
     return null;
 };
-    const handleOpenLegalJournal = useCallback((caseName) => {
-        setLegalJournalQuery(caseName);
-        setIsLegalJournalOpen(true);
-    }, []);
+   const handleOpenLegalJournal = useCallback((caseName, summary) => {
+  setLegalJournalData({ caseName, summary });
+  }, []);
 
     const handleSectionLinkClick = useCallback((sectionNumber) => {
         const sectionData = findSectionByNumber(sectionNumber);
@@ -1440,11 +1440,7 @@ export default function App() {
         }
     }, [handbook]);
 
-    const handleCloseLegalJournal = () => {
-        setIsLegalJournalOpen(false);
-        setLegalJournalQuery("");
-    };
-
+   
     // --- NEW HANDLERS for the Policy Watchtower workflow ---
     const handleApproveUpdate = (update) => {
         const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
