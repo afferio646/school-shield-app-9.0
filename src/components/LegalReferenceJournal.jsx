@@ -14,7 +14,7 @@ export default function LegalReferenceJournal({ query, onClose, apiKey }) {
       setError(null);
       
       const prompt = `You are a legal research assistant. Your task is to perform a Google search for the user's query, which will be a legal case name. 
-You must return the top 4 search results. For each result, you must provide the title, the full URL, and a concise snippet. 
+You must return the top 3 search results. For each result, you must provide the title, the full URL, and a concise snippet. 
 Your entire response must be ONLY a raw JSON object (no markdown, no commentary) that strictly follows this schema: 
 { "results": [{ "title": "string", "url": "string", "snippet": "string" }] }
 
