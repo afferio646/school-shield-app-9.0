@@ -16,7 +16,7 @@ export default function LegalReferenceJournal({ query, onClose, apiKey }) {
       const prompt = `From your internal knowledge, provide a concise, one-paragraph summary of the legal case: "${query}"`;
 
       try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${apiKey}`;
         
         const payload = {
           contents: [{ parts: [{ text: prompt }] }],
