@@ -616,6 +616,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
             }
 
             const result = await response.json();
+            console.log("Full AI Response:", result);
             if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const parsedSteps = JSON.parse(jsonText);
