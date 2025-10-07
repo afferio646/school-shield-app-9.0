@@ -1025,7 +1025,7 @@ const HOSQA = ({
         setCurrentAnswer(null);
         setHosQaQuestion("");
 
-        const prompt = `You are an expert consultant for K-12 school leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response. CRITICAL FORMATTING RULES: 1. Structure your response into logical sections. 2. Each section MUST start with a header enclosed in double asterisks, followed by a colon, and then a newline. For example: **Legal Considerations:**\n 3. Provide a comprehensive answer, using single asterisks (*word*) for emphasis if needed. Question: "${questionText}"`;
+        const prompt = `You are an expert consultant for leaders of **private, independent K-12 schools.** Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response. CRITICAL FORMATTING RULES: 1. Structure your response into logical sections. 2. Each section MUST start with a header enclosed in double asterisks, followed by a colon, and then a newline. For example: **Legal Considerations:**\n 3. Provide a comprehensive answer, using single asterisks (*word*) for emphasis if needed. Question: "${questionText}"`;
 
         try {
             const payload = {
@@ -1499,9 +1499,10 @@ const fullHandbookText = useMemo(() => {
         setLegalAnswer(null);
         setLegalQuestion("");
         
-   const prompt = `Analyze the legal question for a school administrator.
-   CRITICAL INSTRUCTIONS:
-   1.  Your entire response must be a single, valid JSON object.
+  const prompt = `Analyze the legal question for a **private, independent school administrator.**
+  CRITICAL INSTRUCTIONS:
+  **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **private, independent K-12 schools in the U.S.**
+  1.  Your entire response must be a single, valid JSON object.
    2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
    3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a K-12 or analogous higher-education context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
