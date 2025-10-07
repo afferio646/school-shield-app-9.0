@@ -947,6 +947,32 @@ function LEGAL({
     handleSectionLinkClick,
     handleOpenLegalJournal
 }) {
+    const [loadingMessage, setLoadingMessage] = useState("");
+    useEffect(() => {
+    if (isAnalyzingLegal) { // <-- Note we are using isAnalyzingLegal here
+      const messages = [
+        { text: "Analyzing your query...", duration: 5000 },
+        { text: "Cross-referencing legal frameworks...", duration: 10000 },
+        { text: "Identifying relevant statutes...", duration: 10000 },
+        { text: "Finalizing legal guidance...", duration: 5000 }
+      ];
+
+      let totalDuration = 0;
+      const timeouts = [];
+
+      messages.forEach(message => {
+        const timeout = setTimeout(() => {
+          setLoadingMessage(message.text);
+        }, totalDuration);
+        timeouts.push(timeout);
+        totalDuration += message.duration;
+      });
+
+      return () => {
+        timeouts.forEach(clearTimeout);
+      };
+    }
+  }, [isAnalyzingLegal]); // <-- And here
     return (
         <div className="max-w-2xl mx-auto space-y-8">
             <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
@@ -974,7 +1000,7 @@ function LEGAL({
                         onClick={submittedLegalQuestion ? handleLegalQaClose : handleLegalQaSubmit}
                         disabled={isAnalyzingLegal}
                     >
-                        {isAnalyzingLegal ? "Analyzing..." : (submittedLegalQuestion ? "Clear Analysis" : "Submit for Analysis")}
+                        {isAnalyzingLegal ? loadingMessage : (submittedLegalQuestion ? "Clear Analysis" : "Submit for Analysis")}
                     </button>
 
                     {submittedLegalQuestion && (
