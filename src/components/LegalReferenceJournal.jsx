@@ -13,7 +13,7 @@ export default function LegalReferenceJournal({ query, onClose, apiKey }) {
       setIsLoading(true);
       setError(null);
       
-      const prompt = `From your internal knowledge, provide a concise, one-paragraph summary of the legal case: "${query}"`;
+     const prompt = `From your internal knowledge, provide a concise, one-paragraph summary of the legal case: "${query}". **In your summary, please specify if the case's precedent applies primarily to public schools, private schools, or both.**`;
 
       try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${apiKey}`;
