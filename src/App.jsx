@@ -441,6 +441,35 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
     ]);
     const [viewedReport, setViewedReport] = useState(null);
     const [fallbackMessage, setFallbackMessage] = useState("");
+    const [loadingMessage, setLoadingMessage] = useState("");
+    // ADD THIS ENTIRE useEffect BLOCK
+  useEffect(() => {
+    if (loading) { // <-- This hook watches the 'loading' state
+      // Define the sequence of messages for the ~60 second wait
+      const messages = [
+        { text: "Analyzing your issue...", duration: 10000 },
+        { text: "Scanning handbook for policy matches...", duration: 20000 },
+        { text: "Evaluating legal precedents and risks...", duration: 20000 },
+        { text: "Compiling response options...", duration: 10000 }
+      ];
+
+      let totalDuration = 0;
+      const timeouts = [];
+
+      messages.forEach(message => {
+        const timeout = setTimeout(() => {
+          setLoadingMessage(message.text);
+        }, totalDuration);
+        timeouts.push(timeout);
+        totalDuration += message.duration;
+      });
+
+      // Cleanup function to clear timers if analysis finishes early
+      return () => {
+        timeouts.forEach(clearTimeout);
+      };
+    }
+  }, [loading]); // <-- The dependency is 'loading'
     const stepRefs = useRef({});
 
     const handleSubOptionToggle = useCallback((stepKey, optionKey) => {
@@ -763,7 +792,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
                                 disabled={loading || !issue}
                                 className={`px-6 py-2 text-lg font-semibold text-white rounded-md shadow-md transition-colors ${loading || !issue ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
                             >
-                                {loading && activeLoader === 'new' ? "Analyzing..." : "Analyze New Issue"}
+                                {loading && activeLoader === 'new' ? loadingMessage : "Analyze New Issue"}
                             </button>
                         )}
                         <button
@@ -771,7 +800,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
                             disabled={loading || !issue || !responseGenerated}
                             className={`px-6 py-2 text-lg font-semibold text-white rounded-md shadow-md transition-colors ${loading || !issue || !responseGenerated ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
                         >
-                           {loading && activeLoader === 'update' ? "Analyzing..." : "Update & Analyze"}
+                           {loading && activeLoader === 'update' ? loadingMessage : "Update & Analyze"}
                         </button>
                     </div>
                 </div>
