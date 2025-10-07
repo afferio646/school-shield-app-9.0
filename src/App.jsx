@@ -1441,7 +1441,10 @@ export default function App() {
         }
     }, [handbook]);
 
-   
+   const handleCloseLegalJournal = () => {
+    setIsLegalJournalOpen(false);
+    setLegalJournalQuery("");
+  };
     // --- NEW HANDLERS for the Policy Watchtower workflow ---
     const handleApproveUpdate = (update) => {
         const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
