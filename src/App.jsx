@@ -952,8 +952,8 @@ function LEGAL({
     if (isAnalyzingLegal) { // <-- Note we are using isAnalyzingLegal here
       const messages = [
         { text: "Analyzing your query...", duration: 5000 },
-        { text: "Cross-referencing legal frameworks...", duration: 10000 },
-        { text: "Identifying relevant statutes...", duration: 10000 },
+        { text: "Cross-referencing legal citations...", duration: 5000 },
+        { text: "Identifying relevant statutes...", duration: 5000 },
         { text: "Finalizing legal guidance...", duration: 5000 }
       ];
 
