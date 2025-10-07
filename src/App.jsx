@@ -1043,13 +1043,9 @@ const HOSQA = ({
                 throw new Error("Invalid response structure from API.");
             }
             const rawText = result.candidates[0].content.parts[0].text;
-            const answerArray = rawText.split(/\*\*(.*?):\*\*\s*\n/).filter(p => p.trim()).reduce((acc, part, i, arr) => {
-                if (i % 2 === 0) acc.push({ header: `${part.trim()}:`, text: (arr[i + 1] || "").trim() });
-                return acc;
-            }, []);
-
-            setCurrentAnswer(answerArray.length ? answerArray : rawText);
-            setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawText }, ...prev]);
+           // This is the new, correct code
+           setCurrentAnswer(rawText);
+           setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawText }, ...prev]);
         } catch (error) {
             console.error("Error generating AI response:", error);
             setCurrentAnswer(`An error occurred: ${error.message}. Please check your API key and the console.`);
