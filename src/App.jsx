@@ -1428,8 +1428,9 @@ export default function App() {
 
     return null;
 };
-   const handleOpenLegalJournal = useCallback((caseName, summary) => {
-  setLegalJournalData({ caseName, summary });
+  const handleOpenLegalJournal = useCallback((caseName) => {
+    setLegalJournalQuery(caseName);
+    setIsLegalJournalOpen(true);
   }, []);
 
     const handleSectionLinkClick = useCallback((sectionNumber) => {
