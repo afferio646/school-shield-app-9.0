@@ -1015,7 +1015,36 @@ const HOSQA = ({
     hosQaQuestion,
     setHosQaQuestion
 }) => {
+    const [loadingMessage, setLoadingMessage] = useState("");
+    // ADD THIS ENTIRE useEffect BLOCK
+  useEffect(() => {
+    if (isAnalyzing) {
+      // Define the sequence of messages and their durations (in milliseconds)
+      const messages = [
+        { text: "Analyzing your query...", duration: 5000 },
+        { text: "Cross-referencing school policies...", duration: 10000 },
+        { text: "Identifying relevant legal citations...", duration: 10000 },
+        { text: "Finalizing guidance...", duration: 5000 }
+      ];
 
+      let totalDuration = 0;
+      const timeouts = [];
+
+      messages.forEach(message => {
+        const timeout = setTimeout(() => {
+          setLoadingMessage(message.text);
+        }, totalDuration);
+        timeouts.push(timeout);
+        totalDuration += message.duration;
+      });
+
+      // This is a crucial cleanup function.
+      // It runs if the analysis finishes before all messages are shown.
+      return () => {
+        timeouts.forEach(clearTimeout);
+      };
+    }
+  }, [isAnalyzing]); // This effect runs only when `isAnalyzing` changes
     const handleHosQaSubmit = async () => {
         const questionText = hosQaQuestion;
         if (!questionText.trim()) return;
@@ -1080,12 +1109,12 @@ const HOSQA = ({
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all disabled:bg-gray-500 disabled:cursor-not-allowed"
                         onClick={submittedQuestion ? handleHosQaClose : handleHosQaSubmit}
                         disabled={isAnalyzing || (!submittedQuestion && !hosQaQuestion.trim())}>
-                        {isAnalyzing ? "Analyzing..." : (submittedQuestion ? "Clear Answer" : "Submit Question")}
+                        {isAnalyzing ? loadingMessage : (submittedQuestion ? "Clear Answer" : "Submit Question")}
                     </button>
                     {submittedQuestion && (
                         <div className="mt-6 p-4 bg-gray-700 rounded-lg shadow-inner">
                             <p className="font-semibold text-lg text-[#faecc4]">{submittedQuestion}</p>
-                            {isAnalyzing && <p className="text-sm text-yellow-300 mt-2 animate-pulse">Analyzing...</p>}
+                            {isAnalyzing && <p className="text-sm text-yellow-300 mt-2 animate-pulse">{loadingMessage}</p>}
                             {currentAnswer && (
                                 <div className="mt-4 p-4 bg-gray-800 rounded-md border-t-2 border-blue-400">
                                     <AIContentRenderer content={currentAnswer} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
