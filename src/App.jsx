@@ -1359,6 +1359,7 @@ const CALENDAR = ({ events = [], view, onViewChange, setAttendingEvent }) => {
 };
 
 export default function App() {
+      const [organizationType, setOrganizationType] = useState('school'); // 'school' or 'non-profit'
       const [page, setPage] = useState('dashboard');
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
       const [calendarView, setCalendarView] = useState('list'); 
@@ -1782,7 +1783,22 @@ const fullHandbookText = useMemo(() => {
                     alt="School Logo"
                     className="h-16 w-16 md:h-20 md:w-20 rounded-2xl border-4 border-white object-cover shadow-lg"
                 />
-            </div>
+                <div className="bg-black/20 rounded-lg p-1 flex gap-1">
+            <button 
+                onClick={() => setOrganizationType('school')}
+                className={`px-3 py-1 text-xs font-bold rounded ${organizationType === 'school' ? 'bg-white text-black' : 'text-white'}`}
+            >
+                School
+            </button>
+            <button 
+                onClick={() => setOrganizationType('non-profit')}
+                className={`px-3 py-1 text-xs font-bold rounded ${organizationType === 'non-profit' ? 'bg-white text-black' : 'text-white'}`}
+            >
+                Non-Profit
+            </button>
+        </div>
+        {/* --- END SWITCH --- */}
+              </div>
             <div className="hidden md:block text-right">
                 <div
                     className="flex items-center justify-end"
