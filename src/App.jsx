@@ -1102,7 +1102,7 @@ const HOSQA = ({
     hosQaQuestion,
     setHosQaQuestion,
     organizationType,
-    apiKey={apiKey}
+    
 }) => {
 
     const handleHosQaSubmit = async () => {
@@ -1806,6 +1806,7 @@ const fullHandbookText = useMemo(() => {
                     setCurrentAnswer={setCurrentAnswer}
                     hosQaQuestion={hosQaQuestion}
                     organizationType={organizationType}
+                    apiKey={apiKey}
                     setHosQaQuestion={setHosQaQuestion}
                 />;
 
