@@ -1475,33 +1475,41 @@ export default function App() {
     const [isLegalJournalOpen, setIsLegalJournalOpen] = useState(false);
     const [handbook, setHandbook] = useState(HandbookData);
 
-    const [pendingUpdates, setPendingUpdates] = useState([
-    { 
-        id: 1, 
-        title: "New State Law on Student Social Media Interaction", 
-        date: "2025-09-04", 
-        type: "Immediate Action Required", 
-        affectedSection: "6. Code of Conduct", 
-        rationale: "This new state law requires a more explicit policy than what is currently stated...",
-        // ADD THIS NEW PROPERTY WITH THE FULL TEXT
-        sourceText: `
-**House Bill 1412 - Student and Employee Digital Conduct**
-
-**Section 1: Definitions**
-(a) "Electronic Communication" means any transfer of signs, signals, writing, images, sounds, data, or intelligence of any nature transmitted in whole or in part by a wire, radio, electromagnetic, photoelectronic or photooptical system.
-(b) "Personal Social Media Account" means an account on a social media platform that is used by a school employee primarily for personal communications unrelated to school business.
-
-**Section 2: Prohibited Conduct**
-(a) A school employee is prohibited from establishing or maintaining a personal social media connection with a student currently enrolled in the school district. This includes, but is not limited to, accepting 'friend requests' or engaging in private messaging on platforms not officially sanctioned by the school for educational purposes.
-(b) All electronic communication between a school employee and a student must be transparent, professional, and limited to educational matters. Such communication should, whenever possible, take place on school-sanctioned platforms where administrative oversight is possible.
-`
-    }
-]);
-    const [archivedUpdates, setArchivedUpdates] = useState([]);
-    const [monitoredTrends, setMonitoredTrends] = useState([
-    { id: 2, title: "AI Integration in K-12 Curriculum", date: "2025-08-28", type: "Monitor for Future Consideration" },
-    { id: 3, title: "Rise in Four-Day School Weeks", date: "2025-08-25", type: "Monitor for Future Consideration" },
+    // --- School-Specific Data ---
+    const [schoolPendingUpdates, setSchoolPendingUpdates] = useState([
+        { 
+            id: 1, 
+            title: "New State Law on Student Social Media Interaction", 
+            date: "2025-09-04", 
+            type: "Immediate Action Required", 
+            affectedSection: "6. Code of Conduct", 
+            rationale: "This new state law requires a more explicit policy than what is currently stated...",
+            sourceText: `**House Bill 1412 - Student and Employee Digital Conduct**...` // (Your existing source text)
+        }
     ]);
+    const [schoolMonitoredTrends, setSchoolMonitoredTrends] = useState([
+        { id: 2, title: "AI Integration in K-12 Curriculum", date: "2025-08-28", type: "Monitor for Future Consideration" },
+        { id: 3, title: "Rise in Four-Day School Weeks", date: "2025-08-25", type: "Monitor for Future Consideration" },
+    ]);
+
+    // --- Non-Profit-Specific Data ---
+    const [nonprofitPendingUpdates, setNonprofitPendingUpdates] = useState([
+        {
+            id: 101,
+            title: "New DOL Overtime Threshold Rule",
+            date: "2025-07-01",
+            type: "Immediate Action Required",
+            affectedSection: "4. Compensation Policies",
+            rationale: "The new Department of Labor rule increases the minimum salary threshold for exempt employees. Several salaried staff members may now be eligible for overtime.",
+            sourceText: `**Fair Labor Standards Act (FLSA) Update: Overtime Rule** The Department of Labor's final rule raises the standard salary level for Executive, Administrative, and Professional exemptions.`
+        }
+    ]);
+    const [nonprofitMonitoredTrends, setNonprofitMonitoredTrends] = useState([
+        { id: 102, title: "Increased Scrutiny on Donor Data Privacy", date: "2025-09-15", type: "Monitor for Future Consideration" },
+        { id: 103, title: "Formalizing Volunteer Management Policies", date: "2025-08-20", type: "Monitor for Future Consideration" },
+    ]);
+
+    const [archivedUpdates, setArchivedUpdates] = useState([]); // This can remain shared for the demo
 
     const [reviewingUpdate, setReviewingUpdate] = useState(null);
     const [industryQuestions, setIndustryQuestions] = useState([
@@ -1748,19 +1756,19 @@ const fullHandbookText = useMemo(() => {
         organizationType={organizationType}
     />;
 
-           case 'handbook':
-               return <Handbook
-                   onViewAlertDetail={setViewedAlert}
-                   handbookContent={handbook}
-                   pendingUpdates={pendingUpdates}
-                   archivedUpdates={archivedUpdates}
-                   monitoredTrends={monitoredTrends}
-                   onViewUpdate={setReviewingUpdate}
-                   apiKey={apiKey}
-                   HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
-                   handbookSections={handbookSections}
-                   onSectionLinkClick={handleSectionLinkClick}
-               />;
+          case 'handbook':
+           return <Handbook
+               onViewAlertDetail={setViewedAlert}
+               handbookContent={handbook}
+               pendingUpdates={organizationType === 'school' ? schoolPendingUpdates : nonprofitPendingUpdates}
+               archivedUpdates={archivedUpdates}
+               monitoredTrends={organizationType === 'school' ? schoolMonitoredTrends : nonprofitMonitoredTrends}
+               onViewUpdate={setReviewingUpdate}
+               apiKey={GEMINI_API_KEY}
+               HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
+               handbookSections={handbookSections}
+               onSectionLinkClick={handleSectionLinkClick}
+           />;
 
             case 'calendar':
                 return <CALENDAR 
