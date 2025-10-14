@@ -1569,29 +1569,44 @@ export default function App() {
     setLegalJournalQuery("");
   };
     // --- NEW HANDLERS for the Policy Watchtower workflow ---
-    const handleApproveUpdate = (update) => {
-        const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
-        if (sectionKey) {
-            setHandbook(prevHandbook => ({
-                ...prevHandbook,
-                [sectionKey]: prevHandbook[sectionKey] + update.suggestedLanguage
-            }));
+const handleApproveUpdate = (update) => {
+        const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
+        if (sectionKey) {
+            setHandbook(prevHandbook => ({
+                ...prevHandbook,
+                [sectionKey]: prevHandbook[sectionKey] + update.suggestedLanguage
+            }));
+        }
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
         }
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setArchivedUpdates(prev => [{...update, status: 'Approved'}, ...prev]);
-        setReviewingUpdate(null); // Go back to dashboard
-    };
+        setArchivedUpdates(prev => [{...update, status: 'Approved'}, ...prev]);
+        setReviewingUpdate(null);
+    };
 
-    const handleArchiveUpdate = (update) => {
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setArchivedUpdates(prev => [{...update, status: 'Archived'}, ...prev]);
-        setReviewingUpdate(null);
-    };
+    const handleArchiveUpdate = (update) => {
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
+        }
+        setArchivedUpdates(prev => [{...update, status: 'Archived'}, ...prev]);
+        setReviewingUpdate(null);
+    };
 
-    const handleDismissUpdate = (update) => {
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setReviewingUpdate(null);
-    };
+    const handleDismissUpdate = (update) => {
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
+        }
+        setReviewingUpdate(null);
+    };
     const SCHOOL_LOGO = "https://i.ytimg.com/vi/wNI9LjpwVDU/maxresdefault.jpg";
 
     const handbookSections = (onSectionLinkClick) => [
