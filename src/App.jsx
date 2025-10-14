@@ -424,8 +424,8 @@ function ArchivedReportsCard({ reports, onViewReport }) {
 // --- Page Components ---
 
 // --- Risk Assessment & Mitigation Center Component --- //
-function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey }) {
-    const getSectionText = (sectionId) => {
+       function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey, organizationType }) {
+        const getSectionText = (sectionId) => {
         const section = handbookSectionLanguage.find(sec => sec.id === sectionId);
         if (!section) return "Section not found.";
         return section.subsections.map(sub => sub.content).join("\n\n");
@@ -554,8 +554,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         setViewMode('demo');
         setSelectedScenarioKey(scenarioKey);
     };
-
-    const handleGenerate = async (isUpdate = false) => {
+const handleGenerate = async (isUpdate = false) => {
         if (!issue) return;
         setLoading(true);
         setActiveLoader(isUpdate ? 'update' : 'new');
@@ -581,7 +580,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         }
 
         setViewMode('live');
-       if (!apiKey) {
+        if (!apiKey) {
             setGeneratedSteps({ error: "API key is not configured. Please add your API key to the App.jsx file." });
             setResponseGenerated(true);
             setLoading(false);
@@ -590,27 +589,55 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         }
 
         const sourceMaterials = handbookText;
-        const prompt = `
+
+        // --- DYNAMIC PROMPT LOGIC ---
+        const schoolPrompt = `
          You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
-        **CRITICAL INSTRUCTIONS:**
-        **A. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **private, independent K-12 schools in the United States.** Public school precedents should only be used if a private school equivalent is not available, and you must note the distinction.
-            1.  Your entire response MUST be a single, valid JSON object and nothing else.
-            2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
-                -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
-                -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
-                -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
-            3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
-                -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
-                -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
-                -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
-            4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
-            5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
-            6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
-            --- START OF HANDBOOK SOURCE MATERIALS ---
-            ${sourceMaterials}
-            --- END OF HANDBOOK SOURCE MATERIALS ---
-            **User-Provided Scenario:** "${issue}"
+         **CRITICAL INSTRUCTIONS:**
+         **A. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **private, independent K-12 schools in the United States.** Public school precedents should only be used if a private school equivalent is not available, and you must note the distinction.
+             1.  Your entire response MUST be a single, valid JSON object and nothing else.
+             2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+                 -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
+                 -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
+                 -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
+             3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+                 -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
+                 -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
+                 -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+             4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
+             5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+             6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+             --- START OF HANDBOOK SOURCE MATERIALS ---
+             ${sourceMaterials}
+             --- END OF HANDBOOK SOURCE MATERIALS ---
+             **User-Provided Scenario:** "${issue}"
         `;
+
+        const nonprofitPrompt = `
+         You are 'Navigation IQ,' an expert AI consultant specializing in non-profit organization management, HR, and compliance. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance for a non-profit leader. Your tone is professional, authoritative, and meticulously detailed.
+         **CRITICAL INSTRUCTIONS:**
+         **A. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **501(c)(3) non-profit organizations in the United States,** considering clients, staff, volunteers, and board governance.
+             1.  Your entire response MUST be a single, valid JSON object and nothing else.
+             2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+                 -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'breach of fiduciary duty,' 'negligence,' 'confidentiality,' 'ADA').
+                 -   **Step B: Find a Verifiable Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute that directly addresses the concepts from Step A within a non-profit or similar business context.
+                 -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the organizational leader in this context. Generic or irrelevant references are a failure.
+             3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+                 -   'suggestedLanguage' must be a full, professional paragraph an Executive Director could use verbatim in an email or statement.
+                 -   'policyMatch' must reference a specific handbook section number (e.g., "Section 3.1").
+                 -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+             4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, donors, or legal counsel).
+             5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+             6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+             --- START OF HANDBOOK SOURCE MATERIALS ---
+             ${sourceMaterials}
+             --- END OF HANDBOOK SOURCE MATERIALS ---
+             **User-Provided Scenario:** "${issue}"
+        `;
+
+        const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
+        // --- END DYNAMIC PROMPT LOGIC ---
+
         const responseSchema = {
             type: "OBJECT",
             properties: { "step1": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step2": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step3": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step4": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step5": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step6": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "recommendationSummary": { "type": "STRING" }, "implementationSteps": { "type": "ARRAY", "items": { "type": "STRING" } } }, required: ["recommendationSummary", "implementationSteps"] } }, required: ["title", "content"] } }, required: ["step1", "step2", "step3", "step4", "step5", "step6"] };
@@ -664,6 +691,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
             setActiveLoader(null);
         }
     };
+
 
     const handleStepToggle = (stepKey) => {
         const isOpening = !openSteps[stepKey];
@@ -1713,6 +1741,7 @@ const fullHandbookText = useMemo(() => {
         setGeneratedSteps={setRiskGeneratedSteps}
         selectedScenarioKey={riskSelectedScenarioKey}
         setSelectedScenarioKey={setRiskSelectedScenarioKey}
+        organizationType={organizationType}
     />;
 
            case 'handbook':
