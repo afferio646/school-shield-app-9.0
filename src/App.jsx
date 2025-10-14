@@ -1666,7 +1666,7 @@ const fullHandbookText = useMemo(() => {
         { key: "risk", label: "IQ Risk Assessment Center", icon: <AlertCircle className="w-5 h-5" /> },
         { key: "handbook", label: "IQ Handbook Center", icon: <BookOpen className="w-5 h-5" /> },
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
-        { key: "hosqa", label: "IQ School Leaders Q&A", icon: <MessageCircle className="w-5 h-5" /> },
+        { key: "hosqa", label: organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
         { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
     ];
