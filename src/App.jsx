@@ -1779,7 +1779,7 @@ const fullHandbookText = useMemo(() => {
                archivedUpdates={archivedUpdates}
                monitoredTrends={organizationType === 'school' ? schoolMonitoredTrends : nonprofitMonitoredTrends}
                onViewUpdate={setReviewingUpdate}
-               apiKey={GEMINI_API_KEY}
+               apiKey={apiKey}
                HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
                handbookSections={handbookSections}
                onSectionLinkClick={handleSectionLinkClick}
