@@ -1756,7 +1756,7 @@ const fullHandbookText = useMemo(() => {
         organizationType={organizationType}
     />;
 
-          case 'handbook':
+         case 'handbook':
            return <Handbook
                onViewAlertDetail={setViewedAlert}
                handbookContent={handbook}
