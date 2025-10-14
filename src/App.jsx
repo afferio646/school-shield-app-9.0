@@ -1101,7 +1101,8 @@ const HOSQA = ({
     setCurrentAnswer,
     hosQaQuestion,
     setHosQaQuestion,
-    organizationType // Prop is now received
+    organizationType,
+    apiKey
 }) => {
 
     const handleHosQaSubmit = async () => {
@@ -1113,18 +1114,31 @@ const HOSQA = ({
         setCurrentAnswer(null);
         setHosQaQuestion("");
 
-        // --- DYNAMIC PROMPT LOGIC ---
-        const schoolPrompt = `You are an expert consultant for K-12 school leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a private, independent school. CRITICAL FORMATTING RULES: 1. Structure your response into logical sections. 2. Each section MUST start with a header enclosed in double asterisks, followed by a colon, and then a newline. For example: **Legal Considerations:**\n 3. Provide a comprehensive answer, using single asterisks (*word*) for emphasis if needed. Question: "${questionText}"`;
-
-        const nonprofitPrompt = `You are an expert consultant for non-profit leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a 501(c)(3) organization. CRITICAL FORMATTING RULES: 1. Your response must not mention 'school', 'student', 'parent', or any education-specific terms. Use 'organization', 'staff', 'client', 'volunteer', or 'board' instead. 2. Structure your response into logical sections. 3. Each section MUST start with a header enclosed in double asterisks, followed by a colon, and then a newline. For example: **Compliance Considerations:**\n Question: "${questionText}"`;
-
+        const schoolPrompt = `You are an expert consultant for K-12 school leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a private, independent school. Structure your response as an array of objects, where each object has a "header" and a "text" property. Question: "${questionText}"`;
+        const nonprofitPrompt = `You are an expert consultant for non-profit leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a 501(c)(3) organization. Your response must not mention 'school', 'student', 'parent', or any education-specific terms. Structure your response as an array of objects, where each object has a "header" and a "text" property. Question: "${questionText}"`;
         const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
-        // --- END DYNAMIC PROMPT LOGIC ---
+
+        // THIS SCHEMA FORCES THE AI TO RETURN CLEAN, STRUCTURED DATA
+        const responseSchema = {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    "header": { "type": "STRING" },
+                    "text": { "type": "STRING" }
+                },
+                required: ["header", "text"]
+            }
+        };
 
         try {
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.3 }
+                generationConfig: {
+                    responseMimeType: "application/json", // Using JSON mode
+                    responseSchema: responseSchema,
+                    temperature: 0.3
+                }
             };
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${apiKey}`;
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -1137,14 +1151,15 @@ const HOSQA = ({
             if (!result.candidates?.[0]?.content?.parts?.[0]?.text) {
                 throw new Error("Invalid response structure from API.");
             }
-            const rawText = result.candidates[0].content.parts[0].text;
-            const answerArray = rawText.split(/\*\*(.*?):\*\*\s*\n/).filter(p => p.trim()).reduce((acc, part, i, arr) => {
-                if (i % 2 === 0) acc.push({ header: `${part.trim()}:`, text: (arr[i + 1] || "").trim() });
-                return acc;
-            }, []);
+            
+            const jsonText = result.candidates[0].content.parts[0].text;
+            const parsedAnswer = JSON.parse(jsonText); // Directly parse the JSON string
 
-            setCurrentAnswer(answerArray.length ? answerArray : rawText);
-            setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawText }, ...prev]);
+            setCurrentAnswer(parsedAnswer); // The renderer is already built for this format
+
+            const rawTextForArchive = parsedAnswer.map(item => `**${item.header}**\n${item.text}`).join('\n\n');
+            setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawTextForArchive }, ...prev]);
+
         } catch (error) {
             console.error("Error generating AI response:", error);
             setCurrentAnswer(`An error occurred: ${error.message}. Please check your API key and the console.`);
@@ -1162,12 +1177,12 @@ const HOSQA = ({
         <div className="max-w-4xl mx-auto space-y-8">
             <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
                 <div className="p-6">
-                    <SectionHeader icon={<MessageCircle className="text-[#faecc4]" size={26} />} title="IQ School Leaders Q&A" />
+                    <SectionHeader icon={<MessageCircle className="text-[#faecc4]" size={26} />} title={organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A"} />
                     <div className="mb-6 text-white font-medium space-y-2">
                         <p>Ask specific questions and receive immediate guidance. The system is connected to various leading-edge knowledge bases and resources to generate comprehensive answers.</p>
                     </div>
                     <textarea
-                        placeholder="e.g., What are our obligations under FERPA if a parent requests to see another student's disciplinary records?"
+                        placeholder={organizationType === 'school' ? "e.g., What are our obligations under FERPA if a parent requests to see another student's disciplinary records?" : "e.g., What are the legal requirements for dismissing a long-term volunteer for misconduct?"}
                         className="mb-3 min-h-[120px] w-full p-3 rounded-lg text-black text-base focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
                         style={{ background: "#fff", border: "2px solid #ccc" }}
                         value={hosQaQuestion}
@@ -1182,7 +1197,7 @@ const HOSQA = ({
                     </button>
                     {submittedQuestion && (
                         <div className="mt-6 p-4 bg-gray-700 rounded-lg shadow-inner">
-                            <p className="font-semibold text-lg text-[#faecc4]">{submittedQuestion}</p>
+                            <p className="font-semibold text-lg text-gold">{submittedQuestion}</p>
                             {isAnalyzing && <p className="text-sm text-yellow-300 mt-2 animate-pulse">Analyzing...</p>}
                             {currentAnswer && (
                                 <div className="mt-4 p-4 bg-gray-800 rounded-md border-t-2 border-blue-400">
