@@ -1102,7 +1102,7 @@ const HOSQA = ({
     hosQaQuestion,
     setHosQaQuestion,
     organizationType,
-    apiKey
+    apiKey={apiKey}
 }) => {
 
     const handleHosQaSubmit = async () => {
