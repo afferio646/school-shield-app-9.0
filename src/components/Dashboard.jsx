@@ -25,7 +25,7 @@ export default function Dashboard() {
                     <p>
                         Resolve handbook vulnerabilities and policy issues, employee/faculty/student/parent incidents and complaints, navigate legal complexities, and protect your non-profit business or school community, while saving time, reducing costs, and strengthening your leadership impact.
                     </p>
-                    </div>
+                 </div>
              </div>
         </div>
     );
