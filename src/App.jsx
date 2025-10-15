@@ -1626,8 +1626,8 @@ const fullHandbookText = useMemo(() => {
     
     const handleLegalQaSubmit = async () => {
         const questionText = legalQuestion;
-       if (!questionText || !apiKey) {
-             alert("Please provide a question and ensure your API key is set.");
+        if (!questionText || !apiKey) {
+            alert("Please provide a question and ensure your API key is set.");
             return;
         }
 
@@ -1636,35 +1636,42 @@ const fullHandbookText = useMemo(() => {
         setLegalAnswer(null);
         setLegalQuestion("");
         
-  const prompt = `Analyze the legal question for a **private, independent school administrator.**
-  CRITICAL INSTRUCTIONS:
-  **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **private, independent K-12 schools in the U.S.**
-  1.  Your entire response must be a single, valid JSON object.
-   2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
-   3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a K-12 or analogous higher-education context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
-   4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
+        // --- DYNAMIC PROMPT LOGIC ---
+        const schoolPrompt = `Analyze the legal question for a **private, independent school administrator.**
+ CRITICAL INSTRUCTIONS:
+ **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **private, independent K-12 schools in the U.S.**
+ 1.  Your entire response must be a single, valid JSON object.
+    2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
+    3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a K-12 or analogous higher-education context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
+    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
 
-   Question: "${questionText}"`;
+    Question: "${questionText}"`;
+
+        const nonprofitPrompt = `Analyze the legal question for a **non-profit Executive Director.**
+ CRITICAL INSTRUCTIONS:
+ **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **501(c)(3) non-profit organizations in the U.S.** Your response must NOT mention 'school', 'student', 'parent', 'faculty', or any other education-specific terms. Use terms like 'organization', 'staff', 'client', 'volunteer', or 'board' instead.
+ 1.  Your entire response must be a single, valid JSON object.
+    2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
+    3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a non-profit or general business context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
+    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
+
+    Question: "${questionText}"`;
+
+        const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
+        // --- END DYNAMIC PROMPT LOGIC ---
         
         const legalResponseSchema = {
             type: "OBJECT",
             properties: {
                 "guidance": { "type": "STRING" },
                 "references": {
-               type: "OBJECT",
-               properties: {
-                  "citation": { "type": "STRING" },
-                  "relevance": { "type": "STRING" }
-               },
-               required: ["citation", "relevance"]
+                    type: "OBJECT",
+                    properties: { "citation": { "type": "STRING" }, "relevance": { "type": "STRING" } },
+                    required: ["citation", "relevance"]
                 },
                 "risk": {
                     type: "OBJECT",
-                    properties: {
-                        "level": { "type": "STRING" },
-                        "analysis": { "type": "STRING" },
-                        "recommendation": { "type": "ARRAY", "items": { "type": "STRING" } }
-                    },
+                    properties: { "level": { "type": "STRING" }, "analysis": { "type": "STRING" }, "recommendation": { "type": "ARRAY", "items": { "type": "STRING" } } },
                     required: ["level", "analysis", "recommendation"]
                 }
             },
@@ -1699,14 +1706,13 @@ const fullHandbookText = useMemo(() => {
             console.error("Error generating legal AI response:", error);
             setLegalAnswer({
                 guidance: `Sorry, I encountered an error. ${error.message}`,
-                references: "N/A",
+                references: { citation: "N/A", relevance: "Could not perform analysis." },
                 risk: { level: "Unknown", analysis: "Could not analyze risk.", recommendation: ["Please rephrase your question or contact legal counsel directly."] }
             });
         } finally {
             setIsAnalyzingLegal(false);
         }
     };
-
     const handleLegalQaClose = () => {
         setSubmittedLegalQuestion(null);
         setLegalAnswer(null);
