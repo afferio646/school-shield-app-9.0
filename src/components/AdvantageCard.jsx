@@ -33,7 +33,7 @@ export default function AdvantageCard() {
                             <tr className="border-b border-gray-500">
                                 <th scope="row" className="px-4 py-4 font-bold text-white">Reliability</th>
                                 <td className="px-4 py-4">⚠️ Variable. Can "hallucinate" fake legal cases.</td>
-                                <td className="px-4 py-4">✅ High. All guidance is grounded in a fact-first database.</td>
+                                <td className="px-4 py-4">✅ High. All guidance is grounded in a fact-first architecture.</td>
                             </tr>
                             <tr className="border-b border-gray-500">
                                 <th scope="row" className="px-4 py-4 font-bold text-white">Audit Trail</th>
