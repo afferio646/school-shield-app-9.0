@@ -23,7 +23,7 @@ export default function AdvantageCard() {
                             <tr className="border-b border-gray-500">
                                 <th scope="row" className="px-4 py-4 font-bold text-white">Knowledge Source</th>
                                 <td className="px-4 py-4">❌ The public internet (forums, blogs, outdated laws)</td>
-                                <td className="px-4 py-4">✅ <strong className="font-bold text-white">Your Handbook</strong> + Vetted Legal Database</td>
+                                <td className="px-4 py-4">✅ <strong className="font-bold text-white">Your Handbook</strong> + Vetted Legal/State/Federal Databases</td>
                             </tr>
                             <tr className="border-b border-gray-500">
                                 <th scope="row" className="px-4 py-4 font-bold text-white">Context Awareness</th>
