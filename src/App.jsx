@@ -1720,9 +1720,9 @@ const fullHandbookText = useMemo(() => {
     };
         
     // --- SIDEBAR DATA ---
-    const SIDEBAR_LINKS = [
+   // --- DYNAMIC SIDEBAR DATA ---
+    const baseLinks = [
         { key: "dashboard", label: "IQ Dashboard", icon: <Shield className="w-5 h-5" /> },
-        { key: "hr_solutions", label: "IQ HR Solutions Center", icon: <Briefcase className="w-5 h-5" /> },
         { key: "risk", label: "IQ Risk Assessment Center", icon: <AlertCircle className="w-5 h-5" /> },
         { key: "handbook", label: "IQ Handbook Center", icon: <BookOpen className="w-5 h-5" /> },
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
@@ -1730,6 +1730,12 @@ const fullHandbookText = useMemo(() => {
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
         { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
     ];
+
+    const hrSolutionsLink = { key: "hr_solutions", label: "IQ HR Solutions Center", icon: <Briefcase className="w-5 h-5" /> };
+
+    const SIDEBAR_LINKS = organizationType === 'non-profit' 
+        ? [baseLinks[0], hrSolutionsLink, ...baseLinks.slice(1)] 
+        : baseLinks;
 
     // --- MAIN PAGE RENDERING LOGIC ---
 // --- MAIN PAGE RENDERING LOGIC ---
