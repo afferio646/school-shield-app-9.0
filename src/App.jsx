@@ -424,8 +424,8 @@ function ArchivedReportsCard({ reports, onViewReport }) {
 // --- Page Components ---
 
 // --- Risk Assessment & Mitigation Center Component --- //
-function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey }) {
-    const getSectionText = (sectionId) => {
+       function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, onSectionLinkClick, onLegalLinkClick, issue, setIssue, responseGenerated, setResponseGenerated, generatedSteps, setGeneratedSteps, selectedScenarioKey, setSelectedScenarioKey, organizationType }) {
+        const getSectionText = (sectionId) => {
         const section = handbookSectionLanguage.find(sec => sec.id === sectionId);
         if (!section) return "Section not found.";
         return section.subsections.map(sub => sub.content).join("\n\n");
@@ -554,8 +554,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         setViewMode('demo');
         setSelectedScenarioKey(scenarioKey);
     };
-
-    const handleGenerate = async (isUpdate = false) => {
+const handleGenerate = async (isUpdate = false) => {
         if (!issue) return;
         setLoading(true);
         setActiveLoader(isUpdate ? 'update' : 'new');
@@ -581,7 +580,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         }
 
         setViewMode('live');
-       if (!apiKey) {
+        if (!apiKey) {
             setGeneratedSteps({ error: "API key is not configured. Please add your API key to the App.jsx file." });
             setResponseGenerated(true);
             setLoading(false);
@@ -590,27 +589,59 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
         }
 
         const sourceMaterials = handbookText;
-        const prompt = `
+
+        // --- DYNAMIC PROMPT LOGIC ---
+        const schoolPrompt = `
          You are 'Navigation IQ,' an expert AI consultant specializing in K-12 school administration, risk management, and education law. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance. Your tone is professional, authoritative, and meticulously detailed.
-        **CRITICAL INSTRUCTIONS:**
-        **A. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **private, independent K-12 schools in the United States.** Public school precedents should only be used if a private school equivalent is not available, and you must note the distinction.
-            1.  Your entire response MUST be a single, valid JSON object and nothing else.
-            2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
-                -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
-                -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
-                -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
-            3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
-                -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
-                -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
-                -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
-            4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
-            5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
-            6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
-            --- START OF HANDBOOK SOURCE MATERIALS ---
-            ${sourceMaterials}
-            --- END OF HANDBOOK SOURCE MATERIALS ---
-            **User-Provided Scenario:** "${issue}"
+         **CRITICAL INSTRUCTIONS:**
+         **A. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **private, independent K-12 schools in the United States.** Public school precedents should only be used if a private school equivalent is not available, and you must note the distinction.
+             1.  Your entire response MUST be a single, valid JSON object and nothing else.
+             2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+                 -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'due process,' 'negligence,' 'FERPA,' 'Title IX,' 'hostile environment').
+                 -   **Step B: Find a Verifiable K-12 Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute specifically from a K-12 school context that directly addresses the concepts from Step A. Prioritize landmark cases.
+                 -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the school leader in this context. Generic or irrelevant references are a failure.
+             3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+                 -   'suggestedLanguage' must be a full, professional paragraph a Head of School could use verbatim in an email or statement. It must not be a single sentence.
+                 -   'policyMatch' must reference a specific handbook section number (e.g., "Section 2.4").
+                 -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+             4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, social media, legal counsel).
+             5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+             6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+             --- START OF HANDBOOK SOURCE MATERIALS ---
+             ${sourceMaterials}
+             --- END OF HANDBOOK SOURCE MATERIALS ---
+             **User-Provided Scenario:** "${issue}"
         `;
+
+        const nonprofitPrompt = `
+         You are 'Navigation IQ,' an expert AI consultant specializing in non-profit organization management, HR, and compliance. Your function is to analyze a scenario and populate a JSON object with comprehensive, actionable, and legally-informed guidance for a non-profit leader. Your tone is professional, authoritative, and meticulously detailed.
+         
+         **CRITICAL INSTRUCTIONS:**
+
+         **A. CRITICAL CONTEXTUAL RULE: Your entire analysis and all terminology MUST be strictly confined to the context of a non-profit organization. Under no circumstances should your response mention the word 'school,' 'students,' 'parents,' 'faculty,' or any other term exclusive to a K-12 educational environment. Use terms like 'staff,' 'clients,' 'volunteers,' 'donors,' and 'board members.' Any reference to a school is a failure to follow instructions.**
+
+         **B. Primary Context:** All guidance, legal references, and recommendations must be tailored specifically for **501(c)(3) non-profit organizations in the United States,** considering clients, staff, volunteers, and board governance.
+             1.  Your entire response MUST be a single, valid JSON object and nothing else.
+             2.  **LEGAL REFERENCE ANALYSIS:** For every 'legalReference' field, you must execute the following internal monologue and then provide the result. This is not optional.
+                 -   **Step A: Identify Core Legal Concepts.** Analyze the user's issue for key legal terms (e.g., 'breach of fiduciary duty,' 'negligence,' 'confidentiality,' 'ADA').
+                 -   **Step B: Find a Verifiable Case/Statute.** Find a real, verifiable U.S. court case or federal/state statute that directly addresses the concepts from Step A within a non-profit or similar business context.
+                 -   **Step C: Justify and Format.** Format the case name in italics (*Case v. Defendant*) or the statute in bold (**Statute Name**). Follow it with a concise but detailed explanation of *why* this specific case/statute is relevant and what principle it establishes for the organizational leader in this context. Generic or irrelevant references are a failure.
+             3.  **RESPONSE OPTIONS (STEP 4):** You must generate three distinct, plausible response options (A, B, and C). For each option:
+                 -   'suggestedLanguage' must be a full, professional paragraph an Executive Director could use verbatim in an email or statement.
+                 -   'policyMatch' must reference a specific handbook section number (e.g., "Section 3.1").
+                 -   'riskScore' must be 'Low', 'Moderate', or 'High', with a brief justification.
+             4.  **PROJECTED REACTIONS (STEP 5):** Your analysis of likely reactions must be nuanced and consider potential escalations (e.g., to the board, donors, or legal counsel).
+             5.  **FINAL RECOMMENDATION (STEP 6):** The 'recommendationSummary' must be detailed, justifying the chosen option with a 'Confidence Level' and explicit advice on when legal review is necessary. The 'implementationSteps' must be a clear, numbered checklist of 4-5 concrete actions.
+             6.  **ROBUSTNESS:** Do not use placeholder text. Every field must be filled with comprehensive, scenario-specific information as if you were a high-paid consultant. Generic answers are unacceptable.
+             --- START OF HANDBOOK SOURCE MATERIALS ---
+             ${sourceMaterials}
+             --- END OF HANDBOOK SOURCE MATERIALS ---
+             **User-Provided Scenario:** "${issue}"
+        `;
+
+        const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
+        // --- END DYNAMIC PROMPT LOGIC ---
+
         const responseSchema = {
             type: "OBJECT",
             properties: { "step1": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step2": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step3": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "ARRAY", items: { type: "OBJECT", properties: { "header": { "type": "STRING" }, "text": { "type": "STRING" } }, required: ["header", "text"] } } }, required: ["title", "content"] }, "step4": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "suggestedLanguage": { "type": "STRING" }, "policyMatch": { "type": "STRING" }, "riskScore": { "type": "STRING" }, "legalReference": { "type": "STRING" }, "recommendation": { "type": "STRING" } }, required: ["title", "suggestedLanguage", "policyMatch", "riskScore", "legalReference", "recommendation"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step5": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "optionA": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionB": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] }, "optionC": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "likelyResponse": { "type": "STRING" }, "schoolRisk": { "type": "STRING" }, "legalReference": { "type": "STRING" } }, required: ["title", "likelyResponse", "schoolRisk", "legalReference"] } }, required: ["optionA", "optionB", "optionC"] } }, required: ["title", "content"] }, "step6": { type: "OBJECT", properties: { "title": { "type": "STRING" }, "content": { type: "OBJECT", properties: { "recommendationSummary": { "type": "STRING" }, "implementationSteps": { "type": "ARRAY", "items": { "type": "STRING" } } }, required: ["recommendationSummary", "implementationSteps"] } }, required: ["title", "content"] } }, required: ["step1", "step2", "step3", "step4", "step5", "step6"] };
@@ -664,6 +695,7 @@ function RiskAssessmentCenter({ handbookText, apiKey, handbookSectionLanguage, o
             setActiveLoader(null);
         }
     };
+
 
     const handleStepToggle = (stepKey) => {
         const isOpening = !openSteps[stepKey];
@@ -1068,38 +1100,11 @@ const HOSQA = ({
     currentAnswer,
     setCurrentAnswer,
     hosQaQuestion,
-    setHosQaQuestion
+    setHosQaQuestion,
+    organizationType,
+    
 }) => {
-    const [loadingMessage, setLoadingMessage] = useState("");
-    // ADD THIS ENTIRE useEffect BLOCK
-  useEffect(() => {
-    if (isAnalyzing) {
-      // Define the sequence of messages and their durations (in milliseconds)
-      const messages = [
-        { text: "Analyzing your query...", duration: 5000 },
-        { text: "Cross-referencing school policies...", duration: 10000 },
-        { text: "Identifying relevant legal citations...", duration: 10000 },
-        { text: "Finalizing guidance...", duration: 5000 }
-      ];
 
-      let totalDuration = 0;
-      const timeouts = [];
-
-      messages.forEach(message => {
-        const timeout = setTimeout(() => {
-          setLoadingMessage(message.text);
-        }, totalDuration);
-        timeouts.push(timeout);
-        totalDuration += message.duration;
-      });
-
-      // This is a crucial cleanup function.
-      // It runs if the analysis finishes before all messages are shown.
-      return () => {
-        timeouts.forEach(clearTimeout);
-      };
-    }
-  }, [isAnalyzing]); // This effect runs only when `isAnalyzing` changes
     const handleHosQaSubmit = async () => {
         const questionText = hosQaQuestion;
         if (!questionText.trim()) return;
@@ -1109,12 +1114,31 @@ const HOSQA = ({
         setCurrentAnswer(null);
         setHosQaQuestion("");
 
-        const prompt = `You are an expert consultant for leaders of **private, independent K-12 schools.** Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response. CRITICAL FORMATTING RULES: 1. Structure your response into logical sections. 2. Each section MUST start with a header enclosed in double asterisks, followed by a colon, and then a newline. For example: **Legal Considerations:**\n 3. Provide a comprehensive answer, using single asterisks (*word*) for emphasis if needed. Question: "${questionText}"`;
+        const schoolPrompt = `You are an expert consultant for K-12 school leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a private, independent school. Structure your response as an array of objects, where each object has a "header" and a "text" property. Question: "${questionText}"`;
+        const nonprofitPrompt = `You are an expert consultant for non-profit leaders. Your tone is professional, clear, and authoritative. Analyze the following question and provide a detailed, actionable response in the context of a 501(c)(3) organization. Your response must not mention 'school', 'student', 'parent', or any education-specific terms. Structure your response as an array of objects, where each object has a "header" and a "text" property. Question: "${questionText}"`;
+        const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
+
+        // THIS SCHEMA FORCES THE AI TO RETURN CLEAN, STRUCTURED DATA
+        const responseSchema = {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    "header": { "type": "STRING" },
+                    "text": { "type": "STRING" }
+                },
+                required: ["header", "text"]
+            }
+        };
 
         try {
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.3 }
+                generationConfig: {
+                    responseMimeType: "application/json", // Using JSON mode
+                    responseSchema: responseSchema,
+                    temperature: 0.3
+                }
             };
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key=${apiKey}`;
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -1127,10 +1151,15 @@ const HOSQA = ({
             if (!result.candidates?.[0]?.content?.parts?.[0]?.text) {
                 throw new Error("Invalid response structure from API.");
             }
-            const rawText = result.candidates[0].content.parts[0].text;
-           // This is the new, correct code
-           setCurrentAnswer(rawText);
-           setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawText }, ...prev]);
+            
+            const jsonText = result.candidates[0].content.parts[0].text;
+            const parsedAnswer = JSON.parse(jsonText); // Directly parse the JSON string
+
+            setCurrentAnswer(parsedAnswer); // The renderer is already built for this format
+
+            const rawTextForArchive = parsedAnswer.map(item => `**${item.header}**\n${item.text}`).join('\n\n');
+            setIndustryQuestions(prev => [{ id: Date.now(), category: 'Archived Questions', question: questionText, answer: rawTextForArchive }, ...prev]);
+
         } catch (error) {
             console.error("Error generating AI response:", error);
             setCurrentAnswer(`An error occurred: ${error.message}. Please check your API key and the console.`);
@@ -1148,12 +1177,12 @@ const HOSQA = ({
         <div className="max-w-4xl mx-auto space-y-8">
             <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
                 <div className="p-6">
-                    <SectionHeader icon={<MessageCircle className="text-[#faecc4]" size={26} />} title="IQ School Leaders Q&A" />
+                    <SectionHeader icon={<MessageCircle className="text-[#faecc4]" size={26} />} title={organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A"} />
                     <div className="mb-6 text-white font-medium space-y-2">
                         <p>Ask specific questions and receive immediate guidance. The system is connected to various leading-edge knowledge bases and resources to generate comprehensive answers.</p>
                     </div>
                     <textarea
-                        placeholder="e.g., What are our obligations under FERPA if a parent requests to see another student's disciplinary records?"
+                        placeholder={organizationType === 'school' ? "e.g., What are our obligations under FERPA if a parent requests to see another student's disciplinary records?" : "e.g., What are the legal requirements for dismissing a long-term volunteer for misconduct?"}
                         className="mb-3 min-h-[120px] w-full p-3 rounded-lg text-black text-base focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
                         style={{ background: "#fff", border: "2px solid #ccc" }}
                         value={hosQaQuestion}
@@ -1164,12 +1193,12 @@ const HOSQA = ({
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-all disabled:bg-gray-500 disabled:cursor-not-allowed"
                         onClick={submittedQuestion ? handleHosQaClose : handleHosQaSubmit}
                         disabled={isAnalyzing || (!submittedQuestion && !hosQaQuestion.trim())}>
-                        {isAnalyzing ? loadingMessage : (submittedQuestion ? "Clear Answer" : "Submit Question")}
+                        {isAnalyzing ? "Analyzing..." : (submittedQuestion ? "Clear Answer" : "Submit Question")}
                     </button>
                     {submittedQuestion && (
                         <div className="mt-6 p-4 bg-gray-700 rounded-lg shadow-inner">
-                            <p className="font-semibold text-lg text-[#faecc4]">{submittedQuestion}</p>
-                            {isAnalyzing && <p className="text-sm text-yellow-300 mt-2 animate-pulse">{loadingMessage}</p>}
+                            <p className="font-semibold text-lg text-gold">{submittedQuestion}</p>
+                            {isAnalyzing && <p className="text-sm text-yellow-300 mt-2 animate-pulse">Analyzing...</p>}
                             {currentAnswer && (
                                 <div className="mt-4 p-4 bg-gray-800 rounded-md border-t-2 border-blue-400">
                                     <AIContentRenderer content={currentAnswer} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
@@ -1359,6 +1388,7 @@ const CALENDAR = ({ events = [], view, onViewChange, setAttendingEvent }) => {
 };
 
 export default function App() {
+      const [organizationType, setOrganizationType] = useState('school'); // 'school' or 'non-profit'
       const [page, setPage] = useState('dashboard');
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
       const [calendarView, setCalendarView] = useState('list'); 
@@ -1442,33 +1472,41 @@ export default function App() {
     const [isLegalJournalOpen, setIsLegalJournalOpen] = useState(false);
     const [handbook, setHandbook] = useState(HandbookData);
 
-    const [pendingUpdates, setPendingUpdates] = useState([
-    { 
-        id: 1, 
-        title: "New State Law on Student Social Media Interaction", 
-        date: "2025-09-04", 
-        type: "Immediate Action Required", 
-        affectedSection: "6. Code of Conduct", 
-        rationale: "This new state law requires a more explicit policy than what is currently stated...",
-        // ADD THIS NEW PROPERTY WITH THE FULL TEXT
-        sourceText: `
-**House Bill 1412 - Student and Employee Digital Conduct**
-
-**Section 1: Definitions**
-(a) "Electronic Communication" means any transfer of signs, signals, writing, images, sounds, data, or intelligence of any nature transmitted in whole or in part by a wire, radio, electromagnetic, photoelectronic or photooptical system.
-(b) "Personal Social Media Account" means an account on a social media platform that is used by a school employee primarily for personal communications unrelated to school business.
-
-**Section 2: Prohibited Conduct**
-(a) A school employee is prohibited from establishing or maintaining a personal social media connection with a student currently enrolled in the school district. This includes, but is not limited to, accepting 'friend requests' or engaging in private messaging on platforms not officially sanctioned by the school for educational purposes.
-(b) All electronic communication between a school employee and a student must be transparent, professional, and limited to educational matters. Such communication should, whenever possible, take place on school-sanctioned platforms where administrative oversight is possible.
-`
-    }
-]);
-    const [archivedUpdates, setArchivedUpdates] = useState([]);
-    const [monitoredTrends, setMonitoredTrends] = useState([
-    { id: 2, title: "AI Integration in K-12 Curriculum", date: "2025-08-28", type: "Monitor for Future Consideration" },
-    { id: 3, title: "Rise in Four-Day School Weeks", date: "2025-08-25", type: "Monitor for Future Consideration" },
+    // --- School-Specific Data ---
+    const [schoolPendingUpdates, setSchoolPendingUpdates] = useState([
+        { 
+            id: 1, 
+            title: "New State Law on Student Social Media Interaction", 
+            date: "2025-09-04", 
+            type: "Immediate Action Required", 
+            affectedSection: "6. Code of Conduct", 
+            rationale: "This new state law requires a more explicit policy than what is currently stated...",
+            sourceText: `**House Bill 1412 - Student and Employee Digital Conduct**...` // (Your existing source text)
+        }
     ]);
+    const [schoolMonitoredTrends, setSchoolMonitoredTrends] = useState([
+        { id: 2, title: "AI Integration in K-12 Curriculum", date: "2025-08-28", type: "Monitor for Future Consideration" },
+        { id: 3, title: "Rise in Four-Day School Weeks", date: "2025-08-25", type: "Monitor for Future Consideration" },
+    ]);
+
+    // --- Non-Profit-Specific Data ---
+    const [nonprofitPendingUpdates, setNonprofitPendingUpdates] = useState([
+        {
+            id: 101,
+            title: "New DOL Overtime Threshold Rule",
+            date: "2025-07-01",
+            type: "Immediate Action Required",
+            affectedSection: "4. Compensation Policies",
+            rationale: "The new Department of Labor rule increases the minimum salary threshold for exempt employees. Several salaried staff members may now be eligible for overtime.",
+            sourceText: `**Fair Labor Standards Act (FLSA) Update: Overtime Rule** The Department of Labor's final rule raises the standard salary level for Executive, Administrative, and Professional exemptions.`
+        }
+    ]);
+    const [nonprofitMonitoredTrends, setNonprofitMonitoredTrends] = useState([
+        { id: 102, title: "Increased Scrutiny on Donor Data Privacy", date: "2025-09-15", type: "Monitor for Future Consideration" },
+        { id: 103, title: "Formalizing Volunteer Management Policies", date: "2025-08-20", type: "Monitor for Future Consideration" },
+    ]);
+
+    const [archivedUpdates, setArchivedUpdates] = useState([]); // This can remain shared for the demo
 
     const [reviewingUpdate, setReviewingUpdate] = useState(null);
     const [industryQuestions, setIndustryQuestions] = useState([
@@ -1528,29 +1566,44 @@ export default function App() {
     setLegalJournalQuery("");
   };
     // --- NEW HANDLERS for the Policy Watchtower workflow ---
-    const handleApproveUpdate = (update) => {
-        const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
-        if (sectionKey) {
-            setHandbook(prevHandbook => ({
-                ...prevHandbook,
-                [sectionKey]: prevHandbook[sectionKey] + update.suggestedLanguage
-            }));
+const handleApproveUpdate = (update) => {
+        const sectionKey = Object.keys(handbook).find(key => key.startsWith(update.affectedSection.split(' ')[0]));
+        if (sectionKey) {
+            setHandbook(prevHandbook => ({
+                ...prevHandbook,
+                [sectionKey]: prevHandbook[sectionKey] + update.suggestedLanguage
+            }));
+        }
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
         }
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setArchivedUpdates(prev => [{...update, status: 'Approved'}, ...prev]);
-        setReviewingUpdate(null); // Go back to dashboard
-    };
+        setArchivedUpdates(prev => [{...update, status: 'Approved'}, ...prev]);
+        setReviewingUpdate(null);
+    };
 
-    const handleArchiveUpdate = (update) => {
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setArchivedUpdates(prev => [{...update, status: 'Archived'}, ...prev]);
-        setReviewingUpdate(null);
-    };
+    const handleArchiveUpdate = (update) => {
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
+        }
+        setArchivedUpdates(prev => [{...update, status: 'Archived'}, ...prev]);
+        setReviewingUpdate(null);
+    };
 
-    const handleDismissUpdate = (update) => {
-        setPendingUpdates(prev => prev.filter(item => item.id !== update.id));
-        setReviewingUpdate(null);
-    };
+    const handleDismissUpdate = (update) => {
+        const updater = prev => prev.filter(item => item.id !== update.id);
+        if (organizationType === 'school') {
+            setSchoolPendingUpdates(updater);
+        } else {
+            setNonprofitPendingUpdates(updater);
+        }
+        setReviewingUpdate(null);
+    };
     const SCHOOL_LOGO = "https://i.ytimg.com/vi/wNI9LjpwVDU/maxresdefault.jpg";
 
     const handbookSections = (onSectionLinkClick) => [
@@ -1573,8 +1626,8 @@ const fullHandbookText = useMemo(() => {
     
     const handleLegalQaSubmit = async () => {
         const questionText = legalQuestion;
-       if (!questionText || !apiKey) {
-             alert("Please provide a question and ensure your API key is set.");
+        if (!questionText || !apiKey) {
+            alert("Please provide a question and ensure your API key is set.");
             return;
         }
 
@@ -1583,35 +1636,42 @@ const fullHandbookText = useMemo(() => {
         setLegalAnswer(null);
         setLegalQuestion("");
         
-  const prompt = `Analyze the legal question for a **private, independent school administrator.**
-  CRITICAL INSTRUCTIONS:
-  **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **private, independent K-12 schools in the U.S.**
-  1.  Your entire response must be a single, valid JSON object.
-   2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
-   3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a K-12 or analogous higher-education context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
-   4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
+        // --- DYNAMIC PROMPT LOGIC ---
+        const schoolPrompt = `Analyze the legal question for a **private, independent school administrator.**
+ CRITICAL INSTRUCTIONS:
+ **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **private, independent K-12 schools in the U.S.**
+ 1.  Your entire response must be a single, valid JSON object.
+    2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
+    3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a K-12 or analogous higher-education context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
+    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
 
-   Question: "${questionText}"`;
+    Question: "${questionText}"`;
+
+        const nonprofitPrompt = `Analyze the legal question for a **non-profit Executive Director.**
+ CRITICAL INSTRUCTIONS:
+ **A. Primary Context:** All legal analysis, statutes, and court cases must be prioritized for their relevance to **501(c)(3) non-profit organizations in the U.S.** Your response must NOT mention 'school', 'student', 'parent', 'faculty', or any other education-specific terms. Use terms like 'organization', 'staff', 'client', 'volunteer', or 'board' instead.
+ 1.  Your entire response must be a single, valid JSON object.
+    2.  **Global Formatting Rule:** Throughout the ENTIRE response, whenever you cite a legal statute (e.g., Title IX) or court case (e.g., *Davis v. Monroe*), you MUST format it for linking. Wrap statutes in double asterisks (**Statute Name**) and court cases in single asterisks (*Case Name*).
+    3.  For the 'references' object: You MUST provide one **primary, highly-relevant court case** from a non-profit or general business context. Populate the 'citation' field with the formatted case name and the 'relevance' field with a concise explanation. If no case can be found, state that in the 'citation' field.
+    4.  For the 'guidance' field: Provide a thorough analysis. In your explanation, identify and cite **all relevant statutes** using the required formatting.
+
+    Question: "${questionText}"`;
+
+        const prompt = organizationType === 'school' ? schoolPrompt : nonprofitPrompt;
+        // --- END DYNAMIC PROMPT LOGIC ---
         
         const legalResponseSchema = {
             type: "OBJECT",
             properties: {
                 "guidance": { "type": "STRING" },
                 "references": {
-               type: "OBJECT",
-               properties: {
-                  "citation": { "type": "STRING" },
-                  "relevance": { "type": "STRING" }
-               },
-               required: ["citation", "relevance"]
+                    type: "OBJECT",
+                    properties: { "citation": { "type": "STRING" }, "relevance": { "type": "STRING" } },
+                    required: ["citation", "relevance"]
                 },
                 "risk": {
                     type: "OBJECT",
-                    properties: {
-                        "level": { "type": "STRING" },
-                        "analysis": { "type": "STRING" },
-                        "recommendation": { "type": "ARRAY", "items": { "type": "STRING" } }
-                    },
+                    properties: { "level": { "type": "STRING" }, "analysis": { "type": "STRING" }, "recommendation": { "type": "ARRAY", "items": { "type": "STRING" } } },
                     required: ["level", "analysis", "recommendation"]
                 }
             },
@@ -1646,14 +1706,13 @@ const fullHandbookText = useMemo(() => {
             console.error("Error generating legal AI response:", error);
             setLegalAnswer({
                 guidance: `Sorry, I encountered an error. ${error.message}`,
-                references: "N/A",
+                references: { citation: "N/A", relevance: "Could not perform analysis." },
                 risk: { level: "Unknown", analysis: "Could not analyze risk.", recommendation: ["Please rephrase your question or contact legal counsel directly."] }
             });
         } finally {
             setIsAnalyzingLegal(false);
         }
     };
-
     const handleLegalQaClose = () => {
         setSubmittedLegalQuestion(null);
         setLegalAnswer(null);
@@ -1665,7 +1724,7 @@ const fullHandbookText = useMemo(() => {
         { key: "risk", label: "IQ Risk Assessment Center", icon: <AlertCircle className="w-5 h-5" /> },
         { key: "handbook", label: "IQ Handbook Center", icon: <BookOpen className="w-5 h-5" /> },
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
-        { key: "hosqa", label: "IQ School Leaders Q&A", icon: <MessageCircle className="w-5 h-5" /> },
+        { key: "hosqa", label: organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
         { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
     ];
@@ -1712,21 +1771,22 @@ const fullHandbookText = useMemo(() => {
         setGeneratedSteps={setRiskGeneratedSteps}
         selectedScenarioKey={riskSelectedScenarioKey}
         setSelectedScenarioKey={setRiskSelectedScenarioKey}
+        organizationType={organizationType}
     />;
 
-           case 'handbook':
-               return <Handbook
-                   onViewAlertDetail={setViewedAlert}
-                   handbookContent={handbook}
-                   pendingUpdates={pendingUpdates}
-                   archivedUpdates={archivedUpdates}
-                   monitoredTrends={monitoredTrends}
-                   onViewUpdate={setReviewingUpdate}
-                   apiKey={apiKey}
-                   HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
-                   handbookSections={handbookSections}
-                   onSectionLinkClick={handleSectionLinkClick}
-               />;
+         case 'handbook':
+           return <Handbook
+               onViewAlertDetail={setViewedAlert}
+               handbookContent={handbook}
+               pendingUpdates={organizationType === 'school' ? schoolPendingUpdates : nonprofitPendingUpdates}
+               archivedUpdates={archivedUpdates}
+               monitoredTrends={organizationType === 'school' ? schoolMonitoredTrends : nonprofitMonitoredTrends}
+               onViewUpdate={setReviewingUpdate}
+               apiKey={apiKey}
+               HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
+               handbookSections={handbookSections}
+               onSectionLinkClick={handleSectionLinkClick}
+           />;
 
             case 'calendar':
                 return <CALENDAR 
@@ -1751,6 +1811,8 @@ const fullHandbookText = useMemo(() => {
                     currentAnswer={currentAnswer}
                     setCurrentAnswer={setCurrentAnswer}
                     hosQaQuestion={hosQaQuestion}
+                    organizationType={organizationType}
+                    apiKey={apiKey}
                     setHosQaQuestion={setHosQaQuestion}
                 />;
 
@@ -1782,7 +1844,22 @@ const fullHandbookText = useMemo(() => {
                     alt="School Logo"
                     className="h-16 w-16 md:h-20 md:w-20 rounded-2xl border-4 border-white object-cover shadow-lg"
                 />
-            </div>
+                <div className="bg-black/20 rounded-lg p-1 flex gap-1">
+            <button 
+                onClick={() => setOrganizationType('school')}
+                className={`px-3 py-1 text-xs font-bold rounded ${organizationType === 'school' ? 'bg-white text-black' : 'text-white'}`}
+            >
+                School
+            </button>
+            <button 
+                onClick={() => setOrganizationType('non-profit')}
+                className={`px-3 py-1 text-xs font-bold rounded ${organizationType === 'non-profit' ? 'bg-white text-black' : 'text-white'}`}
+            >
+                Non-Profit
+            </button>
+        </div>
+        {/* --- END SWITCH --- */}
+              </div>
             <div className="hidden md:block text-right">
                 <div
                     className="flex items-center justify-end"
