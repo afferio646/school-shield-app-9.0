@@ -13,6 +13,7 @@ import AttendanceModal from './components/AttendanceModal.jsx';
 import { HandbookData } from './components/HandbookData.js';
 import ContactSupportModal from './components/ContactSupportModal.jsx';
 import IQHRCenter from './components/IQHRCenter.jsx';
+import SolutionCenter from './components/SolutionCenter.jsx';
 
 
 // --- SECURE API KEY HANDLING ---
@@ -1390,6 +1391,7 @@ const CALENDAR = ({ events = [], view, onViewChange, setAttendingEvent }) => {
 
 export default function App() {
       const [organizationType, setOrganizationType] = useState('school'); // 'school' or 'non-profit'
+      const [activeModuleId, setActiveModuleId] = useState(null);
       const [page, setPage] = useState('dashboard');
       const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
       const [calendarView, setCalendarView] = useState('list'); 
@@ -1737,9 +1739,29 @@ const fullHandbookText = useMemo(() => {
         ? [baseLinks[0], hrSolutionsLink, ...baseLinks.slice(1)] 
         : baseLinks;
 
-    // --- MAIN PAGE RENDERING LOGIC ---
-// --- MAIN PAGE RENDERING LOGIC ---
-    const renderPage = () => {
+const renderPage = () => {
+        // --- THIS NEW LOGIC CHECKS IF WE'RE IN A SPECIFIC HR MODULE ---
+        if (page === 'hr_solutions' && activeModuleId) {
+            const allModules = [
+                { id: 'leave', title: "Leave & Accommodation Navigator", summary: "Navigate FMLA, ADA, state leave, and workers' comp." },
+                { id: 'discipline', title: "Disciplinary Action Advisor", summary: "Guidance on warnings, improvement plans, and terminations." },
+                { id: 'wage_hour', title: "Wage & Hour Compliance", summary: "Check employee classifications and overtime rules." },
+                { id: 'investigation', title: "Workplace Investigation Manager", summary: "Step-by-step protocols for harassment and discrimination claims." },
+                { id: 'multi_state', title: "Multi-State Compliance Checker", summary: "Analyze policy gaps for remote employees in different states." },
+                { id: 'hiring', title: "Hiring & Background Checks", summary: "Ensure compliance with FCRA and 'Ban-the-Box' laws." },
+                { id: 'benefits', title: "Benefits Compliance Assistant", summary: "Guidance on COBRA, ACA, and HIPAA qualifying events." }
+            ];
+            const activeModule = allModules.find(m => m.id === activeModuleId);
+            
+            return <SolutionCenter 
+                        module={activeModule} 
+                        onBack={() => setActiveModuleId(null)} 
+                        apiKey={apiKey}
+                        organizationType={organizationType}
+                    />;
+        }
+        // --- END OF NEW LOGIC ---
+
         if (reviewingUpdate) {
             const sectionIdToFind = reviewingUpdate.affectedSection.split('.')[0];
             const section = handbook.find(s => s.id === sectionIdToFind);
@@ -1750,53 +1772,53 @@ const fullHandbookText = useMemo(() => {
             return <ReviewUpdate
                 onViewAlertDetail={setViewedAlert}
                 update={reviewingUpdate}
-               apiKey={apiKey}
+                apiKey={apiKey}
                 handbookSectionText={sectionText}
                 onApprove={handleApproveUpdate}
                 onArchive={handleArchiveUpdate}
                 onDismiss={handleDismissUpdate}
                 onClose={() => setReviewingUpdate(null)}
             />;
-        }      
+        }     
 
         switch (page) {
             case 'dashboard':
                 return <Dashboard />;
-            case 'hr_solutions':
-                return <IQHRCenter onModuleSelect={(moduleId) => console.log(`Selected module: ${moduleId}`)} />;
+
+            case 'hr_solutions': // This now shows the hub page
+                return <IQHRCenter onModuleSelect={(moduleId) => setActiveModuleId(moduleId)} />;
 
             case 'risk':
-    return <RiskAssessmentCenter 
-        handbookText={fullHandbookText} 
-        apiKey={apiKey} 
-        handbookSectionLanguage={handbook} 
-        onSectionLinkClick={handleSectionLinkClick} 
-        onLegalLinkClick={handleOpenLegalJournal}
-        // --- ADD THESE PROPS TO CONNECT THE STATE ---
-        issue={riskIssue}
-        setIssue={setRiskIssue}
-        responseGenerated={riskResponseGenerated}
-        setResponseGenerated={setRiskResponseGenerated}
-        generatedSteps={riskGeneratedSteps}
-        setGeneratedSteps={setRiskGeneratedSteps}
-        selectedScenarioKey={riskSelectedScenarioKey}
-        setSelectedScenarioKey={setRiskSelectedScenarioKey}
-        organizationType={organizationType}
-    />;
+                return <RiskAssessmentCenter 
+                    handbookText={fullHandbookText} 
+                    apiKey={apiKey} 
+                    handbookSectionLanguage={handbook} 
+                    onSectionLinkClick={handleSectionLinkClick} 
+                    onLegalLinkClick={handleOpenLegalJournal}
+                    issue={riskIssue}
+                    setIssue={setRiskIssue}
+                    responseGenerated={riskResponseGenerated}
+                    setResponseGenerated={setRiskResponseGenerated}
+                    generatedSteps={riskGeneratedSteps}
+                    setGeneratedSteps={setRiskGeneratedSteps}
+                    selectedScenarioKey={riskSelectedScenarioKey}
+                    setSelectedScenarioKey={setRiskSelectedScenarioKey}
+                    organizationType={organizationType}
+                />;
 
-         case 'handbook':
-           return <Handbook
-               onViewAlertDetail={setViewedAlert}
-               handbookContent={handbook}
-               pendingUpdates={organizationType === 'school' ? schoolPendingUpdates : nonprofitPendingUpdates}
-               archivedUpdates={archivedUpdates}
-               monitoredTrends={organizationType === 'school' ? schoolMonitoredTrends : nonprofitMonitoredTrends}
-               onViewUpdate={setReviewingUpdate}
-               apiKey={apiKey}
-               HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
-               handbookSections={handbookSections}
-               onSectionLinkClick={handleSectionLinkClick}
-           />;
+            case 'handbook':
+                return <Handbook
+                    onViewAlertDetail={setViewedAlert}
+                    handbookContent={handbook}
+                    pendingUpdates={organizationType === 'school' ? schoolPendingUpdates : nonprofitPendingUpdates}
+                    archivedUpdates={archivedUpdates}
+                    monitoredTrends={organizationType === 'school' ? schoolMonitoredTrends : nonprofitMonitoredTrends}
+                    onViewUpdate={setReviewingUpdate}
+                    apiKey={apiKey}
+                    HandbookVulnerabilitiesCardComponent={(props) => <HandbookVulnerabilitiesCard {...props} sections={handbookSections} onSectionLinkClick={handleSectionLinkClick} />}
+                    handbookSections={handbookSections}
+                    onSectionLinkClick={handleSectionLinkClick}
+                />;
 
             case 'calendar':
                 return <CALENDAR 
@@ -1810,10 +1832,8 @@ const fullHandbookText = useMemo(() => {
                 return <HOSQA
                     industryQuestions={industryQuestions}
                     setIndustryQuestions={setIndustryQuestions}
-                    // --- THESE TWO LINES WERE MISSING ---
                     onSectionLinkClick={handleSectionLinkClick}
                     onLegalLinkClick={handleOpenLegalJournal}
-                    // --- END OF FIX ---
                     submittedQuestion={submittedQuestion}
                     setSubmittedQuestion={setSubmittedQuestion}
                     isAnalyzing={isAnalyzing}
@@ -1821,8 +1841,8 @@ const fullHandbookText = useMemo(() => {
                     currentAnswer={currentAnswer}
                     setCurrentAnswer={setCurrentAnswer}
                     hosQaQuestion={hosQaQuestion}
-                    organizationType={organizationType}
                     apiKey={apiKey}
+                    organizationType={organizationType}
                     setHosQaQuestion={setHosQaQuestion}
                 />;
 
@@ -1836,6 +1856,7 @@ const fullHandbookText = useMemo(() => {
                     isAnalyzingLegal={isAnalyzingLegal}
                     legalAnswer={legalAnswer}
                     handleSectionLinkClick={handleSectionLinkClick}
+                    organizationType={organizationType}
                     handleOpenLegalJournal={handleOpenLegalJournal}
                 />;
 
