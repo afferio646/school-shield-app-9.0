@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, LifeBuoy } from "lucide-react";
+import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, LifeBuoy, Briefcase } from "lucide-react";
 
 // --- COMPONENT IMPORTS ---
 import HandbookComparisonCard from './components/HandbookComparisonCard.jsx';
@@ -1721,6 +1721,7 @@ const fullHandbookText = useMemo(() => {
     // --- SIDEBAR DATA ---
     const SIDEBAR_LINKS = [
         { key: "dashboard", label: "IQ Dashboard", icon: <Shield className="w-5 h-5" /> },
+        { key: "hr_solutions", label: "IQ HR Solutions Center", icon: <Briefcase className="w-5 h-5" /> },
         { key: "risk", label: "IQ Risk Assessment Center", icon: <AlertCircle className="w-5 h-5" /> },
         { key: "handbook", label: "IQ Handbook Center", icon: <BookOpen className="w-5 h-5" /> },
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
