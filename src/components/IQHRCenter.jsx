@@ -1,8 +1,8 @@
 import React from 'react';
-import { Briefcase, HeartHand, Gavel, DollarSign, Search, Globe, UserCheck } from 'lucide-react';
+import { Briefcase, HeartHandshake, Gavel, DollarSign, Search, Globe, UserCheck } from 'lucide-react';
 
 const modules = [
-    { id: 'leave', title: "Leave & Accommodation Navigator", summary: "Navigate FMLA, ADA, state leave, and workers' comp.", IconComponent: HeartHand },
+    { id: 'leave', title: "Leave & Accommodation Navigator", summary: "Navigate FMLA, ADA, state leave, and workers' comp.", IconComponent: HeartHandshake },
     { id: 'discipline', title: "Disciplinary Action Advisor", summary: "Guidance on warnings, improvement plans, and terminations.", IconComponent: Gavel },
     { id: 'wage_hour', title: "Wage & Hour Compliance", summary: "Check employee classifications and overtime rules.", IconComponent: DollarSign },
     { id: 'investigation', title: "Workplace Investigation Manager", summary: "Step-by-step protocols for harassment and discrimination claims.", IconComponent: Search },
