@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import AIContentRenderer from './AIContentRenderer'; // Assuming this is in the same folder
+
 
 // This function holds all the specialized AI instructions
 const getPromptAndSchemaForModule = (moduleType, userQuery, organizationType) => {
@@ -47,7 +47,7 @@ const getPromptAndSchemaForModule = (moduleType, userQuery, organizationType) =>
 };
 
 
-export default function SolutionCenter({ module, onBack, apiKey, organizationType }) {
+export default function SolutionCenter({ module, onBack, apiKey, organizationType, AIContentRendererComponent }) {
     const [issue, setIssue] = useState('');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [generatedResponse, setGeneratedResponse] = useState(null);
@@ -120,7 +120,7 @@ export default function SolutionCenter({ module, onBack, apiKey, organizationTyp
 
             {generatedResponse && (
                 <div className="mt-8 rounded-2xl shadow-2xl p-6" style={{ background: "#4B5C64" }}>
-                     <AIContentRenderer content={generatedResponse} />
+                     <AIContentRendererComponent content={generatedResponse} />
                 </div>
             )}
         </div>
