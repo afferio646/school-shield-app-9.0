@@ -1759,6 +1759,7 @@ const renderPage = () => {
                         onBack={() => setActiveModuleId(null)} 
                         apiKey={apiKey}
                         organizationType={organizationType}
+                        AIContentRendererComponent={AIContentRenderer}
                     />;
         }
         // --- END OF NEW LOGIC ---
