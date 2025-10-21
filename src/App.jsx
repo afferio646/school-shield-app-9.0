@@ -1742,6 +1742,7 @@ const fullHandbookText = useMemo(() => {
 const renderPage = () => {
         // --- THIS NEW LOGIC CHECKS IF WE'RE IN A SPECIFIC HR MODULE ---
         if (page === 'hr_solutions' && activeModuleId) {
+            // THIS IS THE COMPLETE LIST THAT WAS MISSING BEFORE
             const allModules = [
                 { id: 'leave', title: "Leave & Accommodation Navigator", summary: "Navigate FMLA, ADA, state leave, and workers' comp." },
                 { id: 'discipline', title: "Disciplinary Action Advisor", summary: "Guidance on warnings, improvement plans, and terminations." },
@@ -1864,7 +1865,6 @@ const renderPage = () => {
                 return <Dashboard />;
         }
     }
-    
     // --- MAIN APP LAYOUT ---
     return (
         <div className="min-h-screen flex flex-col" style={{ background: "#fff" }}>
