@@ -12,6 +12,7 @@ import AlertDetailModal from './components/AlertDetailModal.jsx';
 import AttendanceModal from './components/AttendanceModal.jsx';
 import { HandbookData } from './components/HandbookData.js';
 import ContactSupportModal from './components/ContactSupportModal.jsx';
+import IQHRCenter from './components/IQHRCenter.jsx';
 
 
 // --- SECURE API KEY HANDLING ---
@@ -1755,6 +1756,8 @@ const fullHandbookText = useMemo(() => {
         switch (page) {
             case 'dashboard':
                 return <Dashboard />;
+            case 'hr_solutions':
+                return <IQHRCenter onModuleSelect={(moduleId) => console.log(`Selected module: ${moduleId}`)} />;
 
             case 'risk':
     return <RiskAssessmentCenter 
