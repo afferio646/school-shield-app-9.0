@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileUp, ArrowLeft, Info, GanttChartSquare, BookOpen, DollarSign, Search, Check, User, LifeBuoy } from 'lucide-react';
+import { Shield, Search, FileUp, ArrowLeft, Check, User, DollarSign, BookOpen, LifeBuoy, GanttChartSquare, Archive, Download, Info } from 'lucide-react';
 
 // --- ROBUST Helper Components ---
 function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
-    // CRASH FIX: Handles null, undefined, or non-string values gracefully.
-    if (!text || typeof text !== 'string') {
-        return text || ''; // Return the value or an empty string to prevent crashes.
-    }
+    if (!text || typeof text !== 'string') { return text || ''; }
     const sectionSrc = 'Sections?\\s\\d+(?:\\.\\d+)?';
     const standaloneNumberSrc = '\\b\\d+\\.\\d+\\b';
     const caseLawSrc = '\\*[^*]+\\s?v\\.\\s?[^*]+\\*';
@@ -39,7 +36,6 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
     );
 }
 
-// FIX #1: This renderer now correctly handles arrays for recommendations.
 function AIContentRenderer({ content, onSectionLinkClick, onLegalLinkClick }) {
     if (!content) return null;
     if (typeof content === 'string') {
@@ -72,13 +68,13 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
     }, [isLoading]);
 
     const hrCards = [
-        { title: "Leave & Accommodation Navigator", description: "Navigate FMLA, ADA, state leave, and workers' comp.", icon: <GanttChartSquare size={36} className="text-white" /> },
-        { title: "Disciplinary Action Advisor", description: "Guidance on warnings, improvement plans, and terminations.", icon: <BookOpen size={36} className="text-white" /> },
-        { title: "Wage & Hour Compliance", description: "Check employee classifications and overtime rules.", icon: <DollarSign size={36} className="text-white" /> },
-        { title: "Workplace Investigation Manager", description: "Step-by-step protocols for harassment and discrimination claims.", icon: <Search size={36} className="text-white" /> },
-        { title: "Multi-State Compliance Checker", description: "Analyze policy gaps for remote employees in different states.", icon: <Check size={36} className="text-white" /> },
-        { title: "Hiring & Background Checks", description: "Ensure compliance with FCRA and 'Ban-the-Box' laws.", icon: <User size={36} className="text-white" /> },
-        { title: "Benefits Compliance Assistant", description: "Guidance on COBRA, ACA, and HIPAA qualifying events.", icon: <LifeBuoy size={36} className="text-white" /> }
+        { title: "Leave & Accommodation Navigator", description: "This module helps you navigate complex employee leave scenarios, including FMLA, ADA, state-specific leave laws, and workers' compensation claims.", icon: <GanttChartSquare size={36} className="text-white" /> },
+        { title: "Disciplinary Action Advisor", description: "Receive guidance on issuing warnings, creating performance improvement plans (PIPs), and handling terminations in a compliant and defensible manner.", icon: <BookOpen size={36} className="text-white" /> },
+        { title: "Wage & Hour Compliance", description: "Analyze scenarios related to employee classification (exempt vs. non-exempt), overtime calculations, and other Fair Labor Standards Act (FLSA) rules.", icon: <DollarSign size={36} className="text-white" /> },
+        { title: "Workplace Investigation Manager", description: "Get a step-by-step protocol for conducting fair and thorough investigations into claims of harassment, discrimination, or other misconduct.", icon: <Search size={36} className="text-white" /> },
+        { title: "Multi-State Compliance Checker", description: "Analyze your existing policies to identify potential compliance gaps for remote employees working in different states with varying labor laws.", icon: <Check size={36} className="text-white" /> },
+        { title: "Hiring & Background Checks", description: "Ensure your hiring and background check processes are compliant with the Fair Credit Reporting Act (FCRA) and state-specific 'Ban-the-Box' laws.", icon: <User size={36} className="text-white" /> },
+        { title: "Benefits Compliance Assistant", description: "Guidance on handling qualifying life events and ensuring compliance with federal laws like COBRA, ACA, and HIPAA.", icon: <LifeBuoy size={36} className="text-white" /> }
     ];
 
     const handleCardClick = (card) => { setActiveCard(card); setApiResponse(null); setHrQuery(""); setUploadedFile(null); setFileContent(""); };
@@ -105,7 +101,12 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
             if (!response.ok) throw new Error(`API Error: ${response.status}`);
             const result = await response.json();
             const jsonText = result.candidates[0].content.parts[0].text;
-            setApiResponse(JSON.parse(jsonText));
+            const parsedResponse = JSON.parse(jsonText);
+            const requiredKeys = ["executiveSummary", "documentAnalysis", "handbookPolicyAnalysis", "legalAndComplianceFramework", "actionableRecommendations"];
+            const hasAllKeys = requiredKeys.every(key => Object.prototype.hasOwnProperty.call(parsedResponse, key));
+            if (hasAllKeys && Array.isArray(parsedResponse.actionableRecommendations)) {
+                setApiResponse(parsedResponse);
+            } else { throw new Error("API returned an incomplete or malformed data structure."); }
         } catch (error) {
             console.error("Error generating AI response:", error);
             setApiResponse({ error: `Failed to generate a valid response. Please try again. Details: ${error.message}` });
@@ -118,11 +119,23 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                 <button onClick={() => setActiveCard(null)} className="flex items-center gap-2 text-blue-300 hover:text-blue-200 mb-6 font-semibold"><ArrowLeft size={18} />Back to HR Solutions Center</button>
                 <div className="bg-[#4B5C64] p-6 sm:p-8 rounded-2xl shadow-2xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#faecc4] mb-4">{activeCard.title}</h2>
-                    {/* FIX #3: Professional instruction styling */}
-                    <div className="flex items-start gap-3 text-gray-300 border-t border-b border-gray-600 py-4 mb-6">
-                        <Info size={24} className="flex-shrink-0 mt-1 text-blue-300" />
-                        <p className="text-sm"><strong>Instructions:</strong> {activeCard.description} Describe your scenario in the text box below or upload a relevant document. The system will analyze your input to provide a comprehensive solution.</p>
+                    
+                    {/* --- NEW, POLISHED INSTRUCTIONS --- */}
+                    <div className="text-gray-300 border-t border-b border-gray-600 py-4 mb-6 space-y-4">
+                        <div className="flex items-start gap-3">
+                            <Info size={24} className="flex-shrink-0 mt-1 text-blue-300" />
+                            <p className="text-sm">{activeCard.description}</p>
+                        </div>
+                        <div>
+                            <p className="font-semibold text-gray-200 mb-2">Instructions:</p>
+                            <ol className="list-decimal list-inside text-sm space-y-1">
+                                <li>Describe your specific HR scenario in the text box below. Be as detailed as possible.</li>
+                                <li>(Optional) Click "Upload Document" to provide relevant files like an employee write-up or accommodation request.</li>
+                                <li>Click "Generate Solution" for a comprehensive analysis.</li>
+                            </ol>
+                        </div>
                     </div>
+
                     <textarea className="w-full min-h-[120px] p-3 rounded-lg text-black text-base focus:ring-2 focus:ring-blue-400 focus:outline-none transition mb-4" placeholder="Describe your scenario here..." value={hrQuery} onChange={(e) => setHrQuery(e.target.value)} disabled={isLoading} />
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".txt,.pdf,.doc,.docx" />
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
@@ -131,7 +144,6 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                         </button>
                         {uploadedFile && <span className="text-gray-300 text-sm">Selected: {uploadedFile.name}</span>}
                     </div>
-                    {/* FIX #2: Button logic is now smarter */}
                     <button onClick={apiResponse ? handleCloseAnalysis : handleGenerateSolution} disabled={isLoading} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg shadow-lg text-lg transition-all disabled:bg-gray-500 disabled:cursor-not-allowed">
                         {isLoading ? loadingMessage : (apiResponse ? "Close Analysis" : "Generate Solution")}
                     </button>
