@@ -273,7 +273,9 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
         )}
     </div>
 )}
-          
+  </div> 
+    );
+}        
 
     // --- Grid View (with Archives Added) ---
     return (
