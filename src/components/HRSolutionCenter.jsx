@@ -144,7 +144,43 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
 
     useEffect(() => { /* ... (dynamic loading message effect - no changes needed) ... */ }, [isLoading]);
 
-    const hrCards = [ /* ... (hrCards array - no changes needed) ... */ ];
+    const hrCards = [
+    {
+        title: "Leave & Accommodation Navigator",
+        description: "Navigate FMLA, ADA, state leave, and workers' comp.",
+        icon: <GanttChartSquare size={36} className="text-white" />
+    },
+    {
+        title: "Disciplinary Action Advisor",
+        description: "Guidance on warnings, improvement plans, and terminations.",
+        icon: <BookOpen size={36} className="text-white" />
+    },
+    {
+        title: "Wage & Hour Compliance",
+        description: "Check employee classifications and overtime rules.",
+        icon: <DollarSign size={36} className="text-white" />
+    },
+    {
+        title: "Workplace Investigation Manager",
+        description: "Step-by-step protocols for harassment and discrimination claims.",
+        icon: <Search size={36} className="text-white" />
+    },
+    {
+        title: "Multi-State Compliance Checker",
+        description: "Analyze policy gaps for remote employees in different states.",
+        icon: <Check size={36} className="text-white" />
+    },
+    {
+        title: "Hiring & Background Checks",
+        description: "Ensure compliance with FCRA and 'Ban-the-Box' laws.",
+        icon: <User size={36} className="text-white" />
+    },
+    {
+        title: "Benefits Compliance Assistant",
+        description: "Guidance on COBRA, ACA, and HIPAA qualifying events.",
+        icon: <LifeBuoy size={36} className="text-white" />
+    }
+];
 
     const handleCardClick = (card) => {
         setActiveCard(card);
