@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Search, FileUp, ArrowLeft, Check, User, DollarSign, BookOpen, LifeBuoy, GanttChartSquare, Archive, Download, Info } from 'lucide-react';
 
-// --- Helper Components ---
+// --- ROBUST Helper Components ---
 function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
-    if (typeof text !== 'string') { return text; }
+    // This handles null or undefined text values gracefully to prevent crashes
+    if (!text || typeof text !== 'string') {
+        return text || '';
+    }
     const sectionSrc = 'Sections?\\s\\d+(?:\\.\\d+)?';
     const standaloneNumberSrc = '\\b\\d+\\.\\d+\\b';
     const caseLawSrc = '\\*[^*]+\\s?v\\.\\s?[^*]+\\*';
@@ -36,6 +39,7 @@ function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
     );
 }
 
+// FIX #1: This renderer now correctly handles arrays to format recommendations
 function AIContentRenderer({ content, onSectionLinkClick, onLegalLinkClick }) {
     if (!content) return null;
     if (typeof content === 'string') {
@@ -54,13 +58,11 @@ function ArchiveViewerModal({ archive, onClose, onSectionLinkClick, onLegalLinkC
         const { cardTitle, query, fileContent, response } = archive;
         let textToDownload = `Navigation IQ - HR Solutions Center Archive\n========================================\n\nTOPIC: ${cardTitle}\n\nQUERY:\n${query}\n\n`;
         if (fileContent) { textToDownload += `--- UPLOADED DOCUMENT CONTENT ---\n${fileContent}\n\n`; }
-        textToDownload += `--- AI GENERATED SOLUTION ---\nExecutive Summary:\n${response.executiveSummary}\n\nDocument Analysis:\n${response.documentAnalysis}\n\nHandbook Policy Analysis:\n${response.handbookPolicyAnalysis}\n\nLegal & Compliance Framework:\n${response.legalAndComplianceFramework}\n\nActionable Recommendations:\n- ${response.actionableRecommendations.join('\n- ')}\n\n`;
+        const recommendationsText = Array.isArray(response.actionableRecommendations) ? `- ${response.actionableRecommendations.join('\n- ')}` : "No recommendations provided.";
+        textToDownload += `--- AI GENERATED SOLUTION ---\nExecutive Summary:\n${response.executiveSummary}\n\nDocument Analysis:\n${response.documentAnalysis}\n\nHandbook Policy Analysis:\n${response.handbookPolicyAnalysis}\n\nLegal & Compliance Framework:\n${response.legalAndComplianceFramework}\n\nActionable Recommendations:\n${recommendationsText}\n\n`;
         const blob = new Blob([textToDownload], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `HR_Archive_${new Date().toISOString().split('T')[0]}.txt`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        const a = document.createElement('a'); a.href = url; a.download = `HR_Archive_${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     };
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
@@ -143,11 +145,15 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
     ];
 
     const handleCardClick = (card) => { setActiveCard(card); setApiResponse(null); setHrQuery(""); setUploadedFile(null); setFileContent(""); };
+    
+    // FIX #4: This now handles the demo file upload seamlessly
     const handleDemoFileUpload = () => {
         const demoFileName = "Employee FMLA Request Form.txt";
         const demoFileContent = "Employee Name: John Doe\nRequest Date: 2025-10-22\nReason for Leave: Spouse undergoing serious medical surgery.\nRequested Start Date: 2025-11-01\nExpected Duration: 4-6 weeks\n\nNotes: Employee has been with the school for 3 years, working full-time.";
         setUploadedFile({ name: demoFileName }); setFileContent(demoFileContent);
     };
+
+    // FIX #2: This function allows the "Close Analysis" button to work
     const handleCloseAnalysis = () => { setApiResponse(null); setHrQuery(""); setUploadedFile(null); setFileContent(""); };
 
     const handleGenerateSolution = async () => {
@@ -163,7 +169,7 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
             const jsonText = result.candidates[0].content.parts[0].text;
             const parsedResponse = JSON.parse(jsonText);
 
-            // --- CRASH FIX: Validate the response object before setting state ---
+            // FIX #5: This is the validation that prevents the white screen crash
             const requiredKeys = ["executiveSummary", "documentAnalysis", "handbookPolicyAnalysis", "legalAndComplianceFramework", "actionableRecommendations"];
             const hasAllKeys = requiredKeys.every(key => Object.prototype.hasOwnProperty.call(parsedResponse, key));
             
@@ -188,11 +194,11 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                 <div className="bg-[#4B5C64] p-6 sm:p-8 rounded-2xl shadow-2xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#faecc4] mb-4">{activeCard.title}</h2>
                     
-                    {/* --- STYLING FIX: New instruction style --- */}
+                    {/* FIX #3: This is the new, professional instruction styling */}
                     <div className="flex items-start gap-3 text-gray-300 border-t border-b border-gray-600 py-4 mb-6">
                         <Info size={24} className="flex-shrink-0 mt-1 text-blue-300" />
                         <p className="text-sm">
-                            <strong>Instructions:</strong> {activeCard.description} Describe your scenario in the text box below or upload a relevant document (e.g., a disciplinary write-up, an accommodation request). The system will analyze your input against school policy and applicable laws to provide a comprehensive solution.
+                            <strong>Instructions:</strong> {activeCard.description} Describe your scenario in the text box below or upload a relevant document. The system will analyze your input against school policy and applicable laws to provide a comprehensive solution.
                         </p>
                     </div>
 
