@@ -47,6 +47,71 @@ function AIContentRenderer({ content, onSectionLinkClick, onLegalLinkClick }) {
     return <div className="text-white"><ParsedContent text={JSON.stringify(content, null, 2)} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>;
 }
 
+// --- NEW: Modal for Viewing Archived Responses ---
+function ArchiveViewerModal({ archive, onClose, onSectionLinkClick, onLegalLinkClick }) {
+    if (!archive) return null;
+
+    const handleDownload = () => {
+        const { cardTitle, query, fileContent, response } = archive;
+        let textToDownload = `Navigation IQ - HR Solutions Center Archive\n========================================\n\nTOPIC: ${cardTitle}\n\nQUERY:\n${query}\n\n`;
+        if (fileContent) { textToDownload += `--- UPLOADED DOCUMENT CONTENT ---\n${fileContent}\n\n`; }
+        const recommendationsText = Array.isArray(response.actionableRecommendations) ? `- ${response.actionableRecommendations.join('\n- ')}` : "No recommendations provided.";
+        textToDownload += `--- AI GENERATED SOLUTION ---\nExecutive Summary:\n${response.executiveSummary || 'N/A'}\n\nDocument Analysis:\n${response.documentAnalysis || 'N/A'}\n\nHandbook Policy Analysis:\n${response.handbookPolicyAnalysis || 'N/A'}\n\nLegal & Compliance Framework:\n${response.legalAndComplianceFramework || 'N/A'}\n\nActionable Recommendations:\n${recommendationsText}\n\n`;
+        const blob = new Blob([textToDownload], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `HR_Archive_${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4">
+            <div className="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border-2 border-blue-400">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-600">
+                    <h2 className="text-xl font-bold text-[#faecc4]">{archive.cardTitle}</h2>
+                    <div className="flex items-center gap-4">
+                        <button onClick={handleDownload} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-1 rounded-lg text-sm"><Download size={16}/>Download</button>
+                        <button onClick={onClose} className="text-gray-400 hover:text-white"><Shield size={24} /></button>
+                    </div>
+                </div>
+                <div className="overflow-y-auto pr-4 text-gray-200 space-y-4">
+                    <p className="italic"><strong className="text-gray-400">Original Query:</strong> {archive.query}</p>
+                    <div className="space-y-6">
+                        <div><h3 className="text-lg font-bold text-blue-300 mb-2">Executive Summary</h3><AIContentRenderer content={archive.response.executiveSummary} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>
+                        <div><h3 className="text-lg font-bold text-blue-300 mb-2">Document Analysis</h3><AIContentRenderer content={archive.response.documentAnalysis} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>
+                        <div><h3 className="text-lg font-bold text-blue-300 mb-2">Handbook Policy Analysis</h3><AIContentRenderer content={archive.response.handbookPolicyAnalysis} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>
+                        <div><h3 className="text-lg font-bold text-blue-300 mb-2">Legal & Compliance Framework</h3><AIContentRenderer content={archive.response.legalAndComplianceFramework} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>
+                        <div><h3 className="text-lg font-bold text-blue-300 mb-2">Actionable Recommendations</h3><AIContentRenderer content={archive.response.actionableRecommendations} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} /></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// --- NEW: Component for the Archived List ---
+function ArchivedResponses({ archives, onView }) {
+    const [isOpen, setIsOpen] = useState(false);
+    if (archives.length === 0) return null; // Don't show if there's nothing to show
+    return (
+        <div className="mt-12">
+            <div className="bg-[#4B5C64] p-6 rounded-2xl shadow-lg">
+                <h2 className="text-2xl font-bold text-center mb-4 text-[#faecc4] flex items-center justify-center gap-3"><Archive/>Archived Solutions</h2>
+                <button onClick={() => setIsOpen(!isOpen)} className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 px-4 rounded-lg">{isOpen ? "Hide Archives" : "Show Archives"}</button>
+                {isOpen && (
+                    <div className="mt-4 space-y-2 max-h-60 overflow-y-auto border-t border-gray-600 pt-4">
+                        {archives.map((archive) => (
+                            <button key={archive.id} onClick={() => onView(archive)} className="w-full text-left p-3 bg-gray-700 rounded-lg hover:bg-gray-600">
+                                <p className="font-semibold text-white">{archive.cardTitle}</p>
+                                <p className="text-xs text-gray-400 truncate">{archive.query}</p>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+
 // --- Main HR Solution Center Component ---
 export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkClick, onLegalLinkClick }) {
     const [activeCard, setActiveCard] = useState(null);
@@ -57,6 +122,9 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
     const [loadingMessage, setLoadingMessage] = useState("");
     const [apiResponse, setApiResponse] = useState(null);
     const fileInputRef = useRef(null);
+    // NEW state for archiving
+    const [archivedResponses, setArchivedResponses] = useState([]);
+    const [viewedArchive, setViewedArchive] = useState(null);
 
     useEffect(() => {
         if (isLoading) {
@@ -106,6 +174,9 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
             const hasAllKeys = requiredKeys.every(key => Object.prototype.hasOwnProperty.call(parsedResponse, key));
             if (hasAllKeys && Array.isArray(parsedResponse.actionableRecommendations)) {
                 setApiResponse(parsedResponse);
+                // NEW: Add the successful response to archives
+                const newArchive = { id: Date.now(), cardTitle: activeCard.title, query: hrQuery, fileContent: fileContent, response: parsedResponse };
+                setArchivedResponses(prev => [newArchive, ...prev]);
             } else { throw new Error("API returned an incomplete or malformed data structure."); }
         } catch (error) {
             console.error("Error generating AI response:", error);
@@ -119,8 +190,6 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                 <button onClick={() => setActiveCard(null)} className="flex items-center gap-2 text-blue-300 hover:text-blue-200 mb-6 font-semibold"><ArrowLeft size={18} />Back to HR Solutions Center</button>
                 <div className="bg-[#4B5C64] p-6 sm:p-8 rounded-2xl shadow-2xl">
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#faecc4] mb-4">{activeCard.title}</h2>
-                    
-                    {/* --- NEW, POLISHED INSTRUCTIONS --- */}
                     <div className="text-gray-300 border-t border-b border-gray-600 py-4 mb-6 space-y-4">
                         <div className="flex items-start gap-3">
                             <Info size={24} className="flex-shrink-0 mt-1 text-blue-300" />
@@ -135,7 +204,6 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                             </ol>
                         </div>
                     </div>
-
                     <textarea className="w-full min-h-[120px] p-3 rounded-lg text-black text-base focus:ring-2 focus:ring-blue-400 focus:outline-none transition mb-4" placeholder="Describe your scenario here..." value={hrQuery} onChange={(e) => setHrQuery(e.target.value)} disabled={isLoading} />
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".txt,.pdf,.doc,.docx" />
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
@@ -177,6 +245,9 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                     </button>
                 ))}
             </div>
+            {/* NEW: Render the archives section and the viewer modal */}
+            <ArchivedResponses archives={archivedResponses} onView={setViewedArchive} />
+            {viewedArchive && <ArchiveViewerModal archive={viewedArchive} onClose={() => setViewedArchive(null)} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick}/>}
         </div>
     );
 }
