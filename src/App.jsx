@@ -12,8 +12,7 @@ import AlertDetailModal from './components/AlertDetailModal.jsx';
 import AttendanceModal from './components/AttendanceModal.jsx';
 import { HandbookData } from './components/HandbookData.js';
 import ContactSupportModal from './components/ContactSupportModal.jsx';
-import IQHRCenter from './components/IQHRCenter.jsx';
-import SolutionCenter from './components/SolutionCenter.jsx';
+import HRSolutionCenter from './components/HRSolutionCenter.jsx';
 
 
 // --- SECURE API KEY HANDLING ---
@@ -1738,57 +1737,18 @@ const fullHandbookText = useMemo(() => {
     const SIDEBAR_LINKS = organizationType === 'non-profit' 
         ? [baseLinks[0], hrSolutionsLink, ...baseLinks.slice(1)] 
         : baseLinks;
+    const renderPage = () => {
+    switch (page) {
+        case 'dashboard':
+            return <Dashboard />;
 
-const renderPage = () => {
-        // --- THIS NEW LOGIC CHECKS IF WE'RE IN A SPECIFIC HR MODULE ---
-        if (page === 'hr_solutions' && activeModuleId) {
-            // THIS IS THE COMPLETE LIST THAT WAS MISSING BEFORE
-            const allModules = [
-                { id: 'leave', title: "Leave & Accommodation Navigator", summary: "Navigate FMLA, ADA, state leave, and workers' comp." },
-                { id: 'discipline', title: "Disciplinary Action Advisor", summary: "Guidance on warnings, improvement plans, and terminations." },
-                { id: 'wage_hour', title: "Wage & Hour Compliance", summary: "Check employee classifications and overtime rules." },
-                { id: 'investigation', title: "Workplace Investigation Manager", summary: "Step-by-step protocols for harassment and discrimination claims." },
-                { id: 'multi_state', title: "Multi-State Compliance Checker", summary: "Analyze policy gaps for remote employees in different states." },
-                { id: 'hiring', title: "Hiring & Background Checks", summary: "Ensure compliance with FCRA and 'Ban-the-Box' laws." },
-                { id: 'benefits', title: "Benefits Compliance Assistant", summary: "Guidance on COBRA, ACA, and HIPAA qualifying events." }
-            ];
-            const activeModule = allModules.find(m => m.id === activeModuleId);
-            
-            return <SolutionCenter 
-                        module={activeModule} 
-                        onBack={() => setActiveModuleId(null)} 
-                        apiKey={apiKey}
-                        organizationType={organizationType}
-                        AIContentRendererComponent={AIContentRenderer}
-                    />;
-        }
-        // --- END OF NEW LOGIC ---
-
-        if (reviewingUpdate) {
-            const sectionIdToFind = reviewingUpdate.affectedSection.split('.')[0];
-            const section = handbook.find(s => s.id === sectionIdToFind);
-            const sectionText = section 
-                ? section.subsections.map(sub => sub.content).join('\n\n') 
-                : "Error: Could not load the original handbook section text.";
-
-            return <ReviewUpdate
-                onViewAlertDetail={setViewedAlert}
-                update={reviewingUpdate}
+        case 'hr_solutions': // It finds this key when the button is clicked
+            return <HRSolutionCenter // And it renders your new component
                 apiKey={apiKey}
-                handbookSectionText={sectionText}
-                onApprove={handleApproveUpdate}
-                onArchive={handleArchiveUpdate}
-                onDismiss={handleDismissUpdate}
-                onClose={() => setReviewingUpdate(null)}
+                handbookText={fullHandbookText}
+                onSectionLinkClick={handleSectionLinkClick}
+                onLegalLinkClick={handleOpenLegalJournal}
             />;
-        }     
-
-        switch (page) {
-            case 'dashboard':
-                return <Dashboard />;
-
-            case 'hr_solutions': // This now shows the hub page
-                return <IQHRCenter onModuleSelect={(moduleId) => setActiveModuleId(moduleId)} />;
 
             case 'risk':
                 return <RiskAssessmentCenter 
