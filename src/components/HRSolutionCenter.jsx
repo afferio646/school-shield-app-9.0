@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Search, FileUp, ArrowLeft, Check, User, DollarSign, BookOpen, LifeBuoy, GanttChartSquare, Archive, Download } from 'lucide-react';
+import { Shield, Search, FileUp, ArrowLeft, Check, User, DollarSign, BookOpen, LifeBuoy, GanttChartSquare, Archive, Download, Info } from 'lucide-react';
 
 // --- Helper Components ---
 function ParsedContent({ text, onSectionLinkClick, onLegalLinkClick }) {
@@ -125,29 +125,21 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
 
     useEffect(() => {
         if (isLoading) {
-            const messages = [
-                { text: "Analyzing query and documents...", duration: 15000 },
-                { text: "Cross-referencing handbook policies...", duration: 20000 },
-                { text: "Identifying relevant legal frameworks...", duration: 20000 },
-                { text: "Compiling actionable recommendations...", duration: 10000 }
-            ];
+            const messages = [ { text: "Analyzing query and documents...", duration: 15000 }, { text: "Cross-referencing handbook policies...", duration: 20000 }, { text: "Identifying relevant legal frameworks...", duration: 20000 }, { text: "Compiling actionable recommendations...", duration: 10000 }];
             let totalDuration = 0; const timeouts = [];
-            messages.forEach(message => {
-                const timeout = setTimeout(() => setLoadingMessage(message.text), totalDuration);
-                timeouts.push(timeout); totalDuration += message.duration;
-            });
+            messages.forEach(message => { const timeout = setTimeout(() => setLoadingMessage(message.text), totalDuration); timeouts.push(timeout); totalDuration += message.duration; });
             return () => timeouts.forEach(clearTimeout);
         }
     }, [isLoading]);
 
     const hrCards = [
-        { title: "Leave & Accommodation Navigator", description: "Navigate FMLA, ADA, state leave, and workers' comp.", icon: <GanttChartSquare size={36} className="text-white" /> },
-        { title: "Disciplinary Action Advisor", description: "Guidance on warnings, improvement plans, and terminations.", icon: <BookOpen size={36} className="text-white" /> },
-        { title: "Wage & Hour Compliance", description: "Check employee classifications and overtime rules.", icon: <DollarSign size={36} className="text-white" /> },
-        { title: "Workplace Investigation Manager", description: "Step-by-step protocols for harassment and discrimination claims.", icon: <Search size={36} className="text-white" /> },
-        { title: "Multi-State Compliance Checker", description: "Analyze policy gaps for remote employees in different states.", icon: <Check size={36} className="text-white" /> },
-        { title: "Hiring & Background Checks", description: "Ensure compliance with FCRA and 'Ban-the-Box' laws.", icon: <User size={36} className="text-white" /> },
-        { title: "Benefits Compliance Assistant", description: "Guidance on COBRA, ACA, and HIPAA qualifying events.", icon: <LifeBuoy size={36} className="text-white" /> }
+        { title: "Leave & Accommodation Navigator", description: "This module helps you navigate complex employee leave scenarios, including FMLA, ADA, state-specific leave laws, and workers' compensation claims.", icon: <GanttChartSquare size={36} className="text-white" /> },
+        { title: "Disciplinary Action Advisor", description: "Receive guidance on issuing warnings, creating performance improvement plans (PIPs), and handling terminations in a compliant and defensible manner.", icon: <BookOpen size={36} className="text-white" /> },
+        { title: "Wage & Hour Compliance", description: "Analyze scenarios related to employee classification (exempt vs. non-exempt), overtime calculations, and other Fair Labor Standards Act (FLSA) rules.", icon: <DollarSign size={36} className="text-white" /> },
+        { title: "Workplace Investigation Manager", description: "Get a step-by-step protocol for conducting fair and thorough investigations into claims of harassment, discrimination, or other misconduct.", icon: <Search size={36} className="text-white" /> },
+        { title: "Multi-State Compliance Checker", description: "Analyze your existing policies to identify potential compliance gaps for remote employees working in different states with varying labor laws.", icon: <Check size={36} className="text-white" /> },
+        { title: "Hiring & Background Checks", description: "Ensure your hiring and background check processes are compliant with the Fair Credit Reporting Act (FCRA) and state-specific 'Ban-the-Box' laws.", icon: <User size={36} className="text-white" /> },
+        { title: "Benefits Compliance Assistant", description: "Guidance on handling qualifying life events and ensuring compliance with federal laws like COBRA, ACA, and HIPAA.", icon: <LifeBuoy size={36} className="text-white" /> }
     ];
 
     const handleCardClick = (card) => { setActiveCard(card); setApiResponse(null); setHrQuery(""); setUploadedFile(null); setFileContent(""); };
@@ -169,13 +161,23 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
             if (!response.ok) throw new Error(`API Error: ${response.status}`);
             const result = await response.json();
             const jsonText = result.candidates[0].content.parts[0].text;
-            const newResponse = JSON.parse(jsonText);
-            setApiResponse(newResponse);
-            const newArchive = { id: Date.now(), cardTitle: activeCard.title, query: hrQuery, fileContent: fileContent, response: newResponse };
-            setArchivedResponses(prev => [newArchive, ...prev]);
+            const parsedResponse = JSON.parse(jsonText);
+
+            // --- CRASH FIX: Validate the response object before setting state ---
+            const requiredKeys = ["executiveSummary", "documentAnalysis", "handbookPolicyAnalysis", "legalAndComplianceFramework", "actionableRecommendations"];
+            const hasAllKeys = requiredKeys.every(key => Object.prototype.hasOwnProperty.call(parsedResponse, key));
+            
+            if (hasAllKeys && Array.isArray(parsedResponse.actionableRecommendations)) {
+                setApiResponse(parsedResponse);
+                const newArchive = { id: Date.now(), cardTitle: activeCard.title, query: hrQuery, fileContent: fileContent, response: parsedResponse };
+                setArchivedResponses(prev => [newArchive, ...prev]);
+            } else {
+                throw new Error("API returned an incomplete or malformed data structure.");
+            }
+
         } catch (error) {
             console.error("Error generating AI response:", error);
-            setApiResponse({ error: `Failed to generate response. ${error.message}` });
+            setApiResponse({ error: `Failed to generate a valid response. The AI model may be temporarily unavailable or the response was malformed. Please try again. Details: ${error.message}` });
         } finally { setIsLoading(false); }
     };
 
@@ -184,10 +186,16 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
             <div className="max-w-5xl mx-auto p-4 sm:p-6 text-white">
                 <button onClick={() => setActiveCard(null)} className="flex items-center gap-2 text-blue-300 hover:text-blue-200 mb-6 font-semibold"><ArrowLeft size={18} />Back to HR Solutions Center</button>
                 <div className="bg-[#4B5C64] p-6 sm:p-8 rounded-2xl shadow-2xl">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-[#faecc4] mb-2">{activeCard.title}</h2>
-                    <div className="bg-gray-800 p-3 rounded-md border-l-4 border-blue-400 mb-6">
-                        <p className="text-gray-300 text-sm">{activeCard.description} Describe your scenario in the text box below or upload a relevant document (e.g., a disciplinary write-up, an accommodation request). The system will analyze your input against school policy and applicable laws to provide a comprehensive solution.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#faecc4] mb-4">{activeCard.title}</h2>
+                    
+                    {/* --- STYLING FIX: New instruction style --- */}
+                    <div className="flex items-start gap-3 text-gray-300 border-t border-b border-gray-600 py-4 mb-6">
+                        <Info size={24} className="flex-shrink-0 mt-1 text-blue-300" />
+                        <p className="text-sm">
+                            <strong>Instructions:</strong> {activeCard.description} Describe your scenario in the text box below or upload a relevant document (e.g., a disciplinary write-up, an accommodation request). The system will analyze your input against school policy and applicable laws to provide a comprehensive solution.
+                        </p>
                     </div>
+
                     <textarea className="w-full min-h-[120px] p-3 rounded-lg text-black text-base focus:ring-2 focus:ring-blue-400 focus:outline-none transition mb-4" placeholder="Describe your scenario here..." value={hrQuery} onChange={(e) => setHrQuery(e.target.value)} disabled={isLoading} />
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
                         <button onClick={handleDemoFileUpload} disabled={isLoading} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-500 text-white font-semibold px-5 py-2 rounded-lg shadow-md transition-all disabled:bg-gray-700 disabled:cursor-not-allowed">
