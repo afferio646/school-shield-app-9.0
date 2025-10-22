@@ -241,11 +241,39 @@ export default function HRSolutionCenter({ apiKey, handbookText, onSectionLinkCl
                         {isLoading ? loadingMessage : (apiResponse ? "Close Analysis" : "Generate Solution")}
                     </button>
                 </div>
-
-                {apiResponse && ( /* ... (Response rendering section - no changes needed, it will automatically handle the new array format for recommendations) ... */ )}
-            </div>
-        );
-    }
+{apiResponse && (
+    <div className="mt-8 bg-[#4B5C64] p-6 sm:p-8 rounded-2xl shadow-2xl space-y-6">
+        {apiResponse.error ? (
+            <p className="text-red-400">{apiResponse.error}</p>
+        ) : (
+            <>
+                <div>
+                    <h3 className="text-xl font-bold text-[#faecc4] mb-3">Executive Summary</h3>
+                    <AIContentRenderer content={apiResponse.executiveSummary} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                </div>
+                {apiResponse.documentAnalysis && (
+                    <div className="border-t border-gray-600 pt-4">
+                        <h3 className="text-xl font-bold text-[#faecc4] mb-3">Document Analysis</h3>
+                        <AIContentRenderer content={apiResponse.documentAnalysis} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                    </div>
+                )}
+                <div className="border-t border-gray-600 pt-4">
+                    <h3 className="text-xl font-bold text-[#faecc4] mb-3">Handbook Policy Analysis</h3>
+                    <AIContentRenderer content={apiResponse.handbookPolicyAnalysis} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                </div>
+                <div className="border-t border-gray-600 pt-4">
+                    <h3 className="text-xl font-bold text-[#faecc4] mb-3">Legal & Compliance Framework</h3>
+                    <AIContentRenderer content={apiResponse.legalAndComplianceFramework} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                </div>
+                <div className="border-t border-gray-600 pt-4">
+                    <h3 className="text-xl font-bold text-[#faecc4] mb-3">Actionable Recommendations</h3>
+                    <AIContentRenderer content={apiResponse.actionableRecommendations} onSectionLinkClick={onSectionLinkClick} onLegalLinkClick={onLegalLinkClick} />
+                </div>
+            </>
+        )}
+    </div>
+)}
+          
 
     // --- Grid View (with Archives Added) ---
     return (
