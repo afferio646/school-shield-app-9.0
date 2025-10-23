@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, LifeBuoy, Briefcase } from "lucide-react";
+import { Bell, BookOpen, Shield, AlertCircle, TrendingUp, MessageCircle, Gavel, ChevronLeft, ChevronRight, Calendar, X, Archive, ExternalLink, Search, Menu, LifeBuoy, Briefcase, Megaphone } from "lucide-react";
 
 // --- COMPONENT IMPORTS ---
 import HandbookComparisonCard from './components/HandbookComparisonCard.jsx';
@@ -13,7 +13,8 @@ import AttendanceModal from './components/AttendanceModal.jsx';
 import { HandbookData } from './components/HandbookData.js';
 import ContactSupportModal from './components/ContactSupportModal.jsx';
 import HRSolutionCenter from './components/HRSolutionCenter.jsx';
-
+import ParentRelationsCenter from './components/ParentRelationsCenter.jsx';
+import FundraisingCenter from './components/FundraisingCenter.jsx';
 
 // --- SECURE API KEY HANDLING ---
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -1730,6 +1731,8 @@ const fullHandbookText = useMemo(() => {
         { key: "hosqa", label: organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
         { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
+        { key: "parent_relations", label: "IQ Parent & Community Relations", icon: <Megaphone className="w-5 h-5" /> },
+        { key: "fundraising", label: "IQ Fundraising & Development", icon: <TrendingUp className="w-5 h-5" /> },
     ];
 
     const hrSolutionsLink = { key: "hr_solutions", label: "IQ HR Solutions Center", icon: <Briefcase className="w-5 h-5" /> };
@@ -1821,7 +1824,11 @@ const fullHandbookText = useMemo(() => {
                     organizationType={organizationType}
                     handleOpenLegalJournal={handleOpenLegalJournal}
                 />;
+            case 'parent_relations':
+            return <ParentRelationsCenter />;
 
+            case 'fundraising':
+            return <FundraisingCenter />;
             default:
                 return <Dashboard />;
         }
