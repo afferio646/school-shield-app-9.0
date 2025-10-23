@@ -1730,9 +1730,10 @@ const fullHandbookText = useMemo(() => {
         { key: "calendar", label: "Calendar", icon: <Calendar className="w-5 h-5" /> },
         { key: "hosqa", label: organizationType === 'school' ? "IQ School Leaders Q&A" : "IQ Leader Q&A", icon: <MessageCircle className="w-5 h-5" /> },
         { key: "legal", label: "IQ Legal Guidance", icon: <Gavel className="w-5 h-5" /> },
-        { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
         { key: "parent_relations", label: "IQ Parent & Community Relations", icon: <Megaphone className="w-5 h-5" /> },
         { key: "fundraising", label: "IQ Fundraising & Development", icon: <TrendingUp className="w-5 h-5" /> },
+        { key: "support", label: "Contact Support", icon: <LifeBuoy className="w-5 h-5" /> }
+        
     ];
 
     const hrSolutionsLink = { key: "hr_solutions", label: "IQ HR Solutions Center", icon: <Briefcase className="w-5 h-5" /> };
