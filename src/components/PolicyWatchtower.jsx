@@ -12,13 +12,7 @@ function SectionHeader({ icon, title }) {
 
 export default function PolicyWatchtower({ pendingUpdates, archivedUpdates, monitoredTrends, onViewUpdate, onViewAlertDetail }) {
     const [activeTab, setActiveTab] = useState(null);
-    // --- ADD THIS BLOCK ---
-    useEffect(() => {
-        // This runs after the component has loaded and received its data.
-        // It safely sets the initial tab to 'pending'.
-        setActiveTab('pending');
-    }, []); // The empty array [] ensures this runs only once on load.
-    // --- END OF BLOCK ---
+    
 
     const handleTabClick = (tabName) => {
         setActiveTab(prevTab => (prevTab === tabName ? null : tabName));
@@ -67,25 +61,25 @@ export default function PolicyWatchtower({ pendingUpdates, archivedUpdates, moni
         </div>
     );
 
-    const renderContent = () => {
-        let items;
-        switch (activeTab) {
-            case 'pending':
-                items = pendingUpdates;
-                break;
-            case 'archived':
-                items = archivedUpdates;
-                break;
-            case 'monitored':
-                items = monitoredTrends;
-                break;
-            default:
-                items = [];
-        }
-        return items.length > 0
-            ? items.map(item => renderUpdateItem(item))
-            : <p className="text-center text-gray-400 py-8">No items to display.</p>;
-    };
+   const renderContent = () => {
+    let items;
+    switch (activeTab) {
+        case 'pending':
+            items = pendingUpdates || []; // <-- FIX IS HERE
+            break;
+        case 'archived':
+            items = archivedUpdates || []; // <-- AND HERE
+            break;
+        case 'monitored':
+            items = monitoredTrends || []; // <-- AND HERE
+            break;
+        default:
+            items = [];
+    }
+    return items.length > 0
+        ? items.map(item => renderUpdateItem(item))
+        : <p className="text-center text-gray-400 py-8">No items to display.</p>;
+};
 
     return (
         <div className="shadow-2xl border-0 rounded-2xl" style={{ background: "#4B5C64", color: "#fff" }}>
