@@ -10,8 +10,15 @@ function SectionHeader({ icon, title }) {
     );
 }
 
-export default function PolicyWatchtower({ pendingUpdates = [], archivedUpdates = [], monitoredTrends = [], onViewUpdate, onViewAlertDetail }) {
-    const [activeTab, setActiveTab] = useState(pending);
+export default function PolicyWatchtower({ pendingUpdates, archivedUpdates, monitoredTrends, onViewUpdate, onViewAlertDetail }) {
+    const [activeTab, setActiveTab] = useState(null);
+    // --- ADD THIS BLOCK ---
+    useEffect(() => {
+        // This runs after the component has loaded and received its data.
+        // It safely sets the initial tab to 'pending'.
+        setActiveTab('pending');
+    }, []); // The empty array [] ensures this runs only once on load.
+    // --- END OF BLOCK ---
 
     const handleTabClick = (tabName) => {
         setActiveTab(prevTab => (prevTab === tabName ? null : tabName));
