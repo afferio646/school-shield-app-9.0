@@ -1926,7 +1926,25 @@ const fullHandbookText = useMemo(() => {
                 </aside>
 
                 <main className="flex-1 p-4 md:p-10 overflow-y-auto w-full" style={{ background: "#f3f4f6" }}>
-                    {renderPage()}
+                {reviewingUpdate ? (
+    <ReviewUpdate
+        update={reviewingUpdate}
+        handbookSectionText={
+            handbook
+                .flatMap(sec => sec.subsections)
+                .find(sub => sub.id.startsWith(reviewingUpdate.affectedSection.split('.')[0]))
+                ?.content || ""
+        }
+        onApprove={handleApproveUpdate}
+        onArchive={handleArchiveUpdate}
+        onDismiss={handleDismissUpdate}
+        onClose={() => setReviewingUpdate(null)}
+        onViewAlertDetail={setViewedAlert}
+        apiKey={apiKey}
+    />
+) : (
+    renderPage()
+)}
                 </main>
             </div>
 
