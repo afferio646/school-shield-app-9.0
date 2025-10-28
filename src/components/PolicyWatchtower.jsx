@@ -10,8 +10,8 @@ function SectionHeader({ icon, title }) {
     );
 }
 
-export default function PolicyWatchtower({ pendingUpdates, archivedUpdates, monitoredTrends, onViewUpdate, onViewAlertDetail }) {
-    const [activeTab, setActiveTab] = useState(null);
+export default function PolicyWatchtower({ pendingUpdates = [], archivedUpdates = [], monitoredTrends = [], onViewUpdate, onViewAlertDetail }) {
+    const [activeTab, setActiveTab] = useState(pending);
 
     const handleTabClick = (tabName) => {
         setActiveTab(prevTab => (prevTab === tabName ? null : tabName));
